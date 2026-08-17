@@ -1,162 +1,1024 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VORTEX Battle Zone</title>
 
-    <title>VORTEX Battle Zone</title>
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-    <link rel="stylesheet" href="battle-zone.css">
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #111;
+    font-family: Arial, sans-serif;
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
+}
+
+#hud {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    color: white;
+}
+
+#top {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: rgba(10,10,10,.75);
+    padding: 12px 18px;
+    border: 1px solid rgba(255,255,255,.15);
+    border-radius: 10px;
+}
+
+#health {
+    position: absolute;
+    left: 25px;
+    bottom: 25px;
+    width: 230px;
+    height: 24px;
+    background: #222;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 2px solid #111;
+}
+
+#healthBar {
+    width: 100%;
+    height: 100%;
+    background: #29d65b;
+    transition: width .2s;
+}
+
+#healthText {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    top: 2px;
+    font-weight: bold;
+}
+
+#ammo {
+    position: absolute;
+    right: 30px;
+    bottom: 30px;
+    font-size: 28px;
+    font-weight: bold;
+    text-shadow: 0 2px 5px black;
+}
+
+#reload {
+    position: absolute;
+    right: 30px;
+    bottom: 75px;
+    pointer-events: auto;
+    border: none;
+    padding: 12px 22px;
+    border-radius: 8px;
+    background: #8b2cff;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#reload:hover {
+    background: #a94cff;
+}
+
+#minimap {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 190px;
+    height: 190px;
+    background: rgba(10,10,10,.8);
+    border: 3px solid rgba(255,255,255,.25);
+    border-radius: 10px;
+}
+
+#message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    font-size: 32px;
+    font-weight: bold;
+    text-shadow: 0 3px 10px black;
+    opacity: 0;
+    transition: .3s;
+}
+</style>
 </head>
 
 <body>
 
-    <div id="game">
+<canvas id="game"></canvas>
 
-        <canvas id="gameCanvas"></canvas>
+<div id="hud">
 
-        <!-- HUD -->
-        <div id="hud">
-
-            <div class="top-left">
-
-                <div class="player-card">
-                    <div class="avatar">V</div>
-
-                    <div>
-                        <strong>VORTEX</strong>
-                        <span id="status">ALIVE</span>
-                    </div>
-                </div>
-
-                <div class="health-box">
-
-                    <div class="health-info">
-                        <span>HP</span>
-                        <strong id="healthText">100</strong>
-                    </div>
-
-                    <div class="health-bar">
-                        <div id="healthBar"></div>
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- Mini Map -->
-
-            <div id="miniMapContainer">
-
-                <canvas id="miniMap"></canvas>
-
-                <div class="mini-label">
-                    MINI MAP
-                </div>
-
-            </div>
-
-
-            <!-- Weapon -->
-
-            <div class="weapon-hud">
-
-                <div class="weapon-icon">
-                    🔫
-                </div>
-
-                <div class="weapon-info">
-
-                    <strong>ASSAULT RIFLE</strong>
-
-                    <span>
-                        <b id="ammo">30</b>
-                        /
-                        <span id="reserveAmmo">120</span>
-                    </span>
-
-                </div>
-
-            </div>
-
-
-            <!-- Zone -->
-
-            <div class="zone-hud">
-
-                <span>SAFE ZONE</span>
-
-                <strong id="zoneTimer">
-                    60
-                </strong>
-            </div>
-
-
-            <!-- Players -->
-
-            <div class="players-hud">
-
-                <span>PLAYERS</span>
-
-                <strong id="playersAlive">
-                    25
-                </strong>
-            </div>
-
-
-            <!-- Crosshair -->
-
-            <div id="crosshair">
-
-                <span class="cross top"></span>
-                <span class="cross right"></span>
-                <span class="cross bottom"></span>
-                <span class="cross left"></span>
-
-                <div class="cross-dot"></div>
-
-            </div>
-
-
-            <!-- Kill Feed -->
-
-            <div id="killFeed"></div>
-
-
-            <!-- Messages -->
-
-            <div id="message"></div>
-
-
-            <!-- Controls -->
-
-            <div id="controls">
-
-                <span>
-                    <b>W A S D</b> MOVE
-                </span>
-
-                <span>
-                    <b>MOUSE</b> AIM
-                </span>
-
-                <span>
-                    <b>CLICK</b> SHOOT
-                </span>
-
-                <span>
-                    <b>R</b> RELOAD
-                </span>
-
-            </div>
-
-        </div>
-
+    <div id="top">
+        VORTEX BATTLE ZONE
+        <br>
+        <small>WASD = Move | Mouse = Aim | Click = Shoot</small>
     </div>
 
+    <canvas id="minimap" width="190" height="190"></canvas>
 
-    <script src="battle-zone.js"></script>
+    <div id="health">
+        <div id="healthBar"></div>
+        <div id="healthText">100 HP</div>
+    </div>
+
+    <button id="reload">RELOAD</button>
+
+    <div id="ammo">30 / 120</div>
+
+    <div id="message"></div>
+
+</div>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+const minimap = document.getElementById("minimap");
+const mini = minimap.getContext("2d");
+
+const healthBar = document.getElementById("healthBar");
+const healthText = document.getElementById("healthText");
+const ammoText = document.getElementById("ammo");
+const reloadButton = document.getElementById("reload");
+const message = document.getElementById("message");
+
+function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+
+window.addEventListener("resize", resize);
+resize();
+
+/* =========================
+   WORLD
+========================= */
+
+const WORLD_WIDTH = 5000;
+const WORLD_HEIGHT = 5000;
+
+const keys = {};
+
+let mouseX = canvas.width / 2;
+let mouseY = canvas.height / 2;
+let mouseDown = false;
+
+document.addEventListener("keydown", e => {
+    keys[e.key.toLowerCase()] = true;
+
+    if (e.key.toLowerCase() === "r") {
+        reload();
+    }
+});
+
+document.addEventListener("keyup", e => {
+    keys[e.key.toLowerCase()] = false;
+});
+
+canvas.addEventListener("mousemove", e => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+});
+
+canvas.addEventListener("mousedown", () => {
+    mouseDown = true;
+});
+
+document.addEventListener("mouseup", () => {
+    mouseDown = false;
+});
+
+/* =========================
+   PLAYER
+========================= */
+
+const player = {
+    x: WORLD_WIDTH / 2,
+    y: WORLD_HEIGHT / 2,
+    speed: 4,
+    angle: 0,
+    hp: 100,
+    ammo: 30,
+    reserve: 120
+};
+
+/* =========================
+   CAMERA
+========================= */
+
+const camera = {
+    x: 0,
+    y: 0
+};
+
+/* =========================
+   MAP OBJECTS
+========================= */
+
+const buildings = [];
+const trees = [];
+const rocks = [];
+const crates = [];
+const roads = [];
+
+function random(min,max) {
+    return Math.random() * (max-min) + min;
+}
+
+/* Roads */
+
+roads.push({
+    x: 0,
+    y: 2350,
+    w: WORLD_WIDTH,
+    h: 300
+});
+
+roads.push({
+    x: 2350,
+    y: 0,
+    w: 300,
+    h: WORLD_HEIGHT
+});
+
+/* Buildings */
+
+for(let i=0;i<45;i++) {
+
+    let w = random(100,260);
+    let h = random(100,220);
+
+    let x = random(150,WORLD_WIDTH-w-150);
+    let y = random(150,WORLD_HEIGHT-h-150);
+
+    if (
+        x < 2650 &&
+        x+w > 2350 &&
+        y < 2650 &&
+        y+h > 2350
+    ) continue;
+
+    buildings.push({
+        x,
+        y,
+        w,
+        h,
+        roof: Math.random() > .5
+    });
+}
+
+/* Trees */
+
+for(let i=0;i<500;i++) {
+
+    trees.push({
+        x: random(50,WORLD_WIDTH-50),
+        y: random(50,WORLD_HEIGHT-50),
+        size: random(12,28)
+    });
+}
+
+/* Rocks */
+
+for(let i=0;i<180;i++) {
+
+    rocks.push({
+        x: random(50,WORLD_WIDTH-50),
+        y: random(50,WORLD_HEIGHT-50),
+        size: random(8,25)
+    });
+}
+
+/* Crates */
+
+for(let i=0;i<120;i++) {
+
+    crates.push({
+        x: random(100,WORLD_WIDTH-100),
+        y: random(100,WORLD_HEIGHT-100)
+    });
+}
+
+/* =========================
+   ENEMIES
+========================= */
+
+const enemies = [];
+
+for(let i=0;i<20;i++) {
+
+    enemies.push({
+        x: random(300,WORLD_WIDTH-300),
+        y: random(300,WORLD_HEIGHT-300),
+        angle: random(0,Math.PI*2),
+        hp: 100
+    });
+}
+
+/* =========================
+   BULLETS
+========================= */
+
+const bullets = [];
+
+/* =========================
+   RELOAD
+========================= */
+
+let reloading = false;
+
+function reload() {
+
+    if(reloading) return;
+
+    if(player.ammo >= 30) return;
+
+    if(player.reserve <= 0) return;
+
+    reloading = true;
+
+    message.textContent = "RELOADING...";
+    message.style.opacity = 1;
+
+    setTimeout(() => {
+
+        let needed = 30 - player.ammo;
+        let amount = Math.min(needed,player.reserve);
+
+        player.ammo += amount;
+        player.reserve -= amount;
+
+        reloading = false;
+
+        message.style.opacity = 0;
+
+    },1000);
+}
+
+reloadButton.addEventListener("click",reload);
+
+/* =========================
+   SHOOT
+========================= */
+
+let lastShot = 0;
+
+function shoot() {
+
+    if(reloading) return;
+
+    if(player.ammo <= 0) {
+        reload();
+        return;
+    }
+
+    const now = Date.now();
+
+    if(now-lastShot < 120) return;
+
+    lastShot = now;
+
+    player.ammo--;
+
+    bullets.push({
+        x: player.x,
+        y: player.y,
+        angle: player.angle,
+        speed: 15,
+        life: 80
+    });
+}
+
+/* =========================
+   DRAW WORLD
+========================= */
+
+function drawWorld() {
+
+    ctx.fillStyle = "#68735c";
+    ctx.fillRect(0,0,WORLD_WIDTH,WORLD_HEIGHT);
+
+    /* grass details */
+
+    ctx.fillStyle = "rgba(40,70,40,.35)";
+
+    for(let x=0;x<WORLD_WIDTH;x+=100) {
+
+        for(let y=0;y<WORLD_HEIGHT;y+=100) {
+
+            ctx.fillRect(x,y,2,2);
+
+        }
+    }
+
+    /* roads */
+
+    ctx.fillStyle = "#30343a";
+
+    for(const road of roads) {
+        ctx.fillRect(
+            road.x-camera.x,
+            road.y-camera.y,
+            road.w,
+            road.h
+        );
+    }
+
+    /* road lines */
+
+    ctx.strokeStyle = "#d1bd50";
+    ctx.lineWidth = 5;
+    ctx.setLineDash([40,35]);
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        0-camera.x,
+        2500-camera.y
+    );
+
+    ctx.lineTo(
+        WORLD_WIDTH-camera.x,
+        2500-camera.y
+    );
+
+    ctx.stroke();
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        2500-camera.x,
+        0-camera.y
+    );
+
+    ctx.lineTo(
+        2500-camera.x,
+        WORLD_HEIGHT-camera.y
+    );
+
+    ctx.stroke();
+
+    ctx.setLineDash([]);
+
+    /* buildings */
+
+    for(const b of buildings) {
+
+        ctx.fillStyle = "#252a2d";
+
+        ctx.fillRect(
+            b.x-camera.x,
+            b.y-camera.y,
+            b.w,
+            b.h
+        );
+
+        ctx.fillStyle = "#17191b";
+
+        ctx.fillRect(
+            b.x-camera.x+8,
+            b.y-camera.y+8,
+            b.w-16,
+            b.h-16
+        );
+
+        /* windows */
+
+        ctx.fillStyle = "#a9b6b8";
+
+        for(let wx=b.x+25; wx<b.x+b.w-20; wx+=40) {
+
+            for(let wy=b.y+25; wy<b.y+b.h-20; wy+=40) {
+
+                ctx.fillRect(
+                    wx-camera.x,
+                    wy-camera.y,
+                    12,
+                    12
+                );
+
+            }
+        }
+    }
+
+    /* trees */
+
+    for(const tree of trees) {
+
+        let x=tree.x-camera.x;
+        let y=tree.y-camera.y;
+
+        ctx.fillStyle="#533923";
+
+        ctx.fillRect(
+            x-4,
+            y,
+            8,
+            tree.size
+        );
+
+        ctx.fillStyle="#244d2d";
+
+        ctx.beginPath();
+
+        ctx.arc(
+            x,
+            y,
+            tree.size,
+            0,
+            Math.PI*2
+        );
+
+        ctx.fill();
+
+        ctx.fillStyle="#32683b";
+
+        ctx.beginPath();
+
+        ctx.arc(
+            x-7,
+            y-6,
+            tree.size*.55,
+            0,
+            Math.PI*2
+        );
+
+        ctx.fill();
+    }
+
+    /* rocks */
+
+    for(const rock of rocks) {
+
+        ctx.fillStyle="#55585b";
+
+        ctx.beginPath();
+
+        ctx.arc(
+            rock.x-camera.x,
+            rock.y-camera.y,
+            rock.size,
+            0,
+            Math.PI*2
+        );
+
+        ctx.fill();
+    }
+
+    /* crates */
+
+    for(const crate of crates) {
+
+        ctx.fillStyle="#9b6b35";
+
+        ctx.fillRect(
+            crate.x-camera.x,
+            crate.y-camera.y,
+            28,
+            28
+        );
+
+        ctx.strokeStyle="#4c321a";
+
+        ctx.strokeRect(
+            crate.x-camera.x,
+            crate.y-camera.y,
+            28,
+            28
+        );
+    }
+}
+
+/* =========================
+   DRAW HUMAN PLAYER
+========================= */
+
+function drawHuman(x,y,angle,color="#3f8cff") {
+
+    ctx.save();
+
+    ctx.translate(x,y);
+
+    ctx.rotate(angle);
+
+    /* shadow */
+
+    ctx.fillStyle="rgba(0,0,0,.35)";
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        0,
+        12,
+        18,
+        10,
+        0,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+    /* legs */
+
+    ctx.fillStyle="#20242c";
+
+    ctx.fillRect(-10,5,7,18);
+    ctx.fillRect(3,5,7,18);
+
+    /* body */
+
+    ctx.fillStyle=color;
+
+    ctx.fillRect(
+        -13,
+        -10,
+        26,
+        25
+    );
+
+    /* arms */
+
+    ctx.fillStyle="#d2a17b";
+
+    ctx.fillRect(-19,-7,7,18);
+    ctx.fillRect(12,-7,7,18);
+
+    /* head */
+
+    ctx.beginPath();
+
+    ctx.arc(
+        0,
+        -22,
+        10,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+    /* hair */
+
+    ctx.fillStyle="#202020";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        0,
+        -25,
+        10,
+        Math.PI,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+    /* gun */
+
+    ctx.fillStyle="#171717";
+
+    ctx.fillRect(
+        10,
+        -4,
+        25,
+        6
+    );
+
+    ctx.restore();
+}
+
+/* =========================
+   PLAYER
+========================= */
+
+function drawPlayer() {
+
+    drawHuman(
+        player.x-camera.x,
+        player.y-camera.y,
+        player.angle,
+        "#368cff"
+    );
+}
+
+/* =========================
+   ENEMIES
+========================= */
+
+function drawEnemies() {
+
+    for(const enemy of enemies) {
+
+        if(enemy.hp <= 0) continue;
+
+        drawHuman(
+            enemy.x-camera.x,
+            enemy.y-camera.y,
+            enemy.angle,
+            "#d63c48"
+        );
+    }
+}
+
+/* =========================
+   BULLETS
+========================= */
+
+function drawBullets() {
+
+    ctx.fillStyle="#ffe66d";
+
+    for(const bullet of bullets) {
+
+        ctx.beginPath();
+
+        ctx.arc(
+            bullet.x-camera.x,
+            bullet.y-camera.y,
+            4,
+            0,
+            Math.PI*2
+        );
+
+        ctx.fill();
+    }
+}
+
+/* =========================
+   MINIMAP
+========================= */
+
+function drawMinimap() {
+
+    mini.clearRect(
+        0,
+        0,
+        minimap.width,
+        minimap.height
+    );
+
+    mini.fillStyle="#536047";
+
+    mini.fillRect(
+        0,
+        0,
+        190,
+        190
+    );
+
+    /* roads */
+
+    mini.fillStyle="#30343a";
+
+    mini.fillRect(
+        0,
+        89,
+        190,
+        12
+    );
+
+    mini.fillRect(
+        89,
+        0,
+        12,
+        190
+    );
+
+    /* buildings */
+
+    mini.fillStyle="#222";
+
+    for(const b of buildings) {
+
+        mini.fillRect(
+            b.x/WORLD_WIDTH*190,
+            b.y/WORLD_HEIGHT*190,
+            b.w/WORLD_WIDTH*190,
+            b.h/WORLD_HEIGHT*190
+        );
+    }
+
+    /* enemies */
+
+    mini.fillStyle="#ff4040";
+
+    for(const enemy of enemies) {
+
+        if(enemy.hp <= 0) continue;
+
+        mini.fillRect(
+            enemy.x/WORLD_WIDTH*190-2,
+            enemy.y/WORLD_HEIGHT*190-2,
+            4,
+            4
+        );
+    }
+
+    /* player */
+
+    mini.fillStyle="#39a0ff";
+
+    mini.beginPath();
+
+    mini.arc(
+        player.x/WORLD_WIDTH*190,
+        player.y/WORLD_HEIGHT*190,
+        5,
+        0,
+        Math.PI*2
+    );
+
+    mini.fill();
+}
+
+/* =========================
+   UPDATE PLAYER
+========================= */
+
+function updatePlayer() {
+
+    let dx=0;
+    let dy=0;
+
+    if(keys["w"]) dy--;
+    if(keys["s"]) dy++;
+    if(keys["a"]) dx--;
+    if(keys["d"]) dx++;
+
+    if(dx !== 0 || dy !== 0) {
+
+        const length=Math.hypot(dx,dy);
+
+        dx/=length;
+        dy/=length;
+
+        player.x += dx*player.speed;
+        player.y += dy*player.speed;
+    }
+
+    player.x=Math.max(30,Math.min(WORLD_WIDTH-30,player.x));
+    player.y=Math.max(30,Math.min(WORLD_HEIGHT-30,player.y));
+
+    camera.x=player.x-canvas.width/2;
+    camera.y=player.y-canvas.height/2;
+
+    camera.x=Math.max(0,Math.min(
+        WORLD_WIDTH-canvas.width,
+        camera.x
+    ));
+
+    camera.y=Math.max(0,Math.min(
+        WORLD_HEIGHT-canvas.height,
+        camera.y
+    ));
+
+    player.angle=Math.atan2(
+        mouseY-canvas.height/2,
+        mouseX-canvas.width/2
+    );
+
+    if(mouseDown) shoot();
+}
+
+/* =========================
+   UPDATE BULLETS
+========================= */
+
+function updateBullets() {
+
+    for(let i=bullets.length-1;i>=0;i--) {
+
+        const bullet=bullets[i];
+
+        bullet.x+=Math.cos(bullet.angle)*bullet.speed;
+        bullet.y+=Math.sin(bullet.angle)*bullet.speed;
+
+        bullet.life--;
+
+        for(const enemy of enemies) {
+
+            if(enemy.hp<=0) continue;
+
+            const distance=Math.hypot(
+                bullet.x-enemy.x,
+                bullet.y-enemy.y
+            );
+
+            if(distance<22) {
+
+                enemy.hp-=50;
+                bullet.life=0;
+
+                break;
+            }
+        }
+
+        if(bullet.life<=0) {
+            bullets.splice(i,1);
+        }
+    }
+}
+
+/* =========================
+   UPDATE ENEMIES
+========================= */
+
+function updateEnemies() {
+
+    for(const enemy of enemies) {
+
+        if(enemy.hp<=0) continue;
+
+        const dx=player.x-enemy.x;
+        const dy=player.y-enemy.y;
+
+        const distance=Math.hypot(dx,dy);
+
+        enemy.angle=Math.atan2(dy,dx);
+
+        if(distance>250) {
+
+            enemy.x+=Math.cos(enemy.angle)*1;
+            enemy.y+=Math.sin(enemy.angle)*1;
+
+        } else if(distance<250 && Math.random()<0.01) {
+
+            player.hp-=2;
+
+            if(player.hp<0) player.hp=0;
+        }
+    }
+}
+
+/* =========================
+   HUD
+========================= */
+
+function updateHUD() {
+
+    healthBar.style.width=player.hp+"%";
+    healthText.textContent=Math.ceil(player.hp)+" HP";
+
+    ammoText.textContent=
+        player.ammo+" / "+player.reserve;
+}
+
+/* =========================
+   GAME LOOP
+========================= */
+
+function gameLoop() {
+
+    updatePlayer();
+    updateBullets();
+    updateEnemies();
+
+    ctx.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+    ctx.save();
+
+    drawWorld();
+    drawBullets();
+    drawEnemies();
+    drawPlayer();
+
+    ctx.restore();
+
+    drawMinimap();
+    updateHUD();
+
+    requestAnimationFrame(gameLoop);
+}
+
+gameLoop();
+</script>
 
 </body>
 </html>
