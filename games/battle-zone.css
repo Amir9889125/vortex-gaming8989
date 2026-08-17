@@ -1,1 +1,331 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
 
+html,body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#101510;
+    font-family:Arial,Helvetica,sans-serif;
+    user-select:none;
+}
+
+#game{
+    position:relative;
+    width:100vw;
+    height:100vh;
+    overflow:hidden;
+    background:#394b35;
+}
+
+#gameCanvas{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    cursor:none;
+}
+
+#hud{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    z-index:5;
+}
+
+#topLeft{
+    position:absolute;
+    top:20px;
+    left:22px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.logo{
+    font-size:24px;
+    font-weight:900;
+    letter-spacing:5px;
+    color:#fff;
+    text-shadow:0 3px 12px #000;
+}
+
+.hudBox{
+    background:rgba(8,12,8,.88);
+    border:1px solid rgba(255,255,255,.16);
+    padding:9px 12px;
+    color:#9da39b;
+    font-size:10px;
+}
+
+.hudBox b{
+    color:#fff;
+    margin-left:5px;
+    font-size:14px;
+}
+
+#zoneStatus{
+    position:absolute;
+    top:20px;
+    left:50%;
+    transform:translateX(-50%);
+    padding:9px 18px;
+    background:rgba(26,52,30,.9);
+    border:1px solid rgba(157,210,161,.35);
+    color:#d9f5db;
+    font-size:11px;
+    font-weight:bold;
+}
+
+#topRight{
+    position:absolute;
+    top:20px;
+    right:22px;
+}
+
+.weaponBox{
+    min-width:175px;
+    padding:10px 14px;
+    background:rgba(8,12,8,.9);
+    border:1px solid rgba(255,255,255,.16);
+    color:#aaa;
+}
+
+.weaponBox span{
+    display:block;
+    font-size:9px;
+    margin-bottom:5px;
+}
+
+.weaponBox b{
+    color:white;
+    font-size:20px;
+}
+
+#minimapBox{
+    position:absolute;
+    top:68px;
+    right:22px;
+    width:210px;
+    height:210px;
+    padding:4px;
+    background:#101610;
+    border:2px solid rgba(255,255,255,.65);
+    box-shadow:0 7px 25px rgba(0,0,0,.45);
+}
+
+#minimap{
+    width:100%;
+    height:100%;
+    display:block;
+}
+
+#crosshair{
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:24px;
+    height:24px;
+    transform:translate(-50%,-50%);
+}
+
+#crosshair i{
+    position:absolute;
+    background:#fff;
+    box-shadow:0 0 4px #000;
+}
+
+#crosshair i:nth-child(1){
+    width:2px;
+    height:8px;
+    left:11px;
+    top:0;
+}
+
+#crosshair i:nth-child(2){
+    width:2px;
+    height:8px;
+    left:11px;
+    bottom:0;
+}
+
+#crosshair i:nth-child(3){
+    width:8px;
+    height:2px;
+    left:0;
+    top:11px;
+}
+
+#crosshair i:nth-child(4){
+    width:8px;
+    height:2px;
+    right:0;
+    top:11px;
+}
+
+#bottomLeft{
+    position:absolute;
+    left:22px;
+    bottom:22px;
+    width:270px;
+}
+
+.label{
+    color:#d7d7d7;
+    font-size:9px;
+    font-weight:bold;
+    margin:5px 0 4px;
+}
+
+.bar{
+    width:100%;
+    height:11px;
+    background:rgba(0,0,0,.65);
+    border:1px solid rgba(255,255,255,.15);
+}
+
+.bar div{
+    width:100%;
+    height:100%;
+    background:#d9ddd8;
+    transition:.15s;
+}
+
+.bar.armor div{
+    background:#7693a7;
+}
+
+#controls{
+    position:absolute;
+    bottom:25px;
+    right:22px;
+    display:flex;
+    gap:8px;
+}
+
+#controls span{
+    padding:7px 10px;
+    background:rgba(8,12,8,.75);
+    color:#92988f;
+    border:1px solid rgba(255,255,255,.1);
+    font-size:8px;
+}
+
+#startScreen,
+#endScreen{
+    position:absolute;
+    inset:0;
+    z-index:20;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:rgba(5,8,5,.82);
+}
+
+#endScreen{
+    display:none;
+}
+
+.startPanel{
+    text-align:center;
+    padding:55px;
+    min-width:400px;
+    background:rgba(12,17,12,.95);
+    border:1px solid rgba(255,255,255,.18);
+    box-shadow:0 25px 80px rgba(0,0,0,.55);
+}
+
+.bigLogo{
+    color:#fff;
+    font-size:55px;
+    font-weight:900;
+    letter-spacing:12px;
+}
+
+.startPanel h1{
+    margin-top:8px;
+    color:#b7c4b6;
+    letter-spacing:5px;
+    font-size:19px;
+}
+
+.startPanel p{
+    margin:14px 0 28px;
+    color:#747b73;
+    font-size:10px;
+    letter-spacing:3px;
+}
+
+.startPanel button{
+    border:1px solid #8da48e;
+    background:#405a42;
+    color:white;
+    padding:13px 38px;
+    font-weight:bold;
+    letter-spacing:3px;
+    cursor:pointer;
+    transition:.25s;
+}
+
+.startPanel button:hover{
+    background:#5a785c;
+    transform:translateY(-2px);
+}
+
+#endTitle{
+    color:#fff;
+    font-size:50px;
+    font-weight:900;
+    letter-spacing:7px;
+}
+
+@media(max-width:700px){
+
+    #topLeft{
+        left:10px;
+        top:10px;
+    }
+
+    .logo{
+        display:none;
+    }
+
+    #topRight{
+        top:10px;
+        right:10px;
+    }
+
+    .weaponBox{
+        min-width:130px;
+    }
+
+    #minimapBox{
+        width:155px;
+        height:155px;
+        right:10px;
+        top:60px;
+    }
+
+    #bottomLeft{
+        left:10px;
+        bottom:10px;
+        width:190px;
+    }
+
+    #controls{
+        display:none;
+    }
+
+    .startPanel{
+        min-width:0;
+        width:90%;
+        padding:40px 20px;
+    }
+
+    .bigLogo{
+        font-size:42px;
+    }
+}
