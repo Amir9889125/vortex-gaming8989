@@ -1,73 +1,162 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
-<title>VORTEX Battle Zone</title>
-<link rel="stylesheet" href="battle-zone.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>VORTEX Battle Zone</title>
+
+    <link rel="stylesheet" href="battle-zone.css">
 </head>
+
 <body>
 
-<div id="game">
-    <canvas id="gameCanvas"></canvas>
+    <div id="game">
 
-    <div id="hud">
-        <div id="topLeft">
-            <div class="logo">VORTEX</div>
-            <div class="hudBox">ALIVE <b id="alive">25</b></div>
-            <div class="hudBox">KILLS <b id="kills">0</b></div>
-        </div>
+        <canvas id="gameCanvas"></canvas>
 
-        <div id="zoneStatus">SAFE ZONE</div>
+        <!-- HUD -->
+        <div id="hud">
 
-        <div id="topRight">
-            <div class="weaponBox">
-                <span>ASSAULT RIFLE</span>
-                <b id="ammo">30 / 120</b>
+            <div class="top-left">
+
+                <div class="player-card">
+                    <div class="avatar">V</div>
+
+                    <div>
+                        <strong>VORTEX</strong>
+                        <span id="status">ALIVE</span>
+                    </div>
+                </div>
+
+                <div class="health-box">
+
+                    <div class="health-info">
+                        <span>HP</span>
+                        <strong id="healthText">100</strong>
+                    </div>
+
+                    <div class="health-bar">
+                        <div id="healthBar"></div>
+                    </div>
+
+                </div>
+
             </div>
+
+
+            <!-- Mini Map -->
+
+            <div id="miniMapContainer">
+
+                <canvas id="miniMap"></canvas>
+
+                <div class="mini-label">
+                    MINI MAP
+                </div>
+
+            </div>
+
+
+            <!-- Weapon -->
+
+            <div class="weapon-hud">
+
+                <div class="weapon-icon">
+                    🔫
+                </div>
+
+                <div class="weapon-info">
+
+                    <strong>ASSAULT RIFLE</strong>
+
+                    <span>
+                        <b id="ammo">30</b>
+                        /
+                        <span id="reserveAmmo">120</span>
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- Zone -->
+
+            <div class="zone-hud">
+
+                <span>SAFE ZONE</span>
+
+                <strong id="zoneTimer">
+                    60
+                </strong>
+            </div>
+
+
+            <!-- Players -->
+
+            <div class="players-hud">
+
+                <span>PLAYERS</span>
+
+                <strong id="playersAlive">
+                    25
+                </strong>
+            </div>
+
+
+            <!-- Crosshair -->
+
+            <div id="crosshair">
+
+                <span class="cross top"></span>
+                <span class="cross right"></span>
+                <span class="cross bottom"></span>
+                <span class="cross left"></span>
+
+                <div class="cross-dot"></div>
+
+            </div>
+
+
+            <!-- Kill Feed -->
+
+            <div id="killFeed"></div>
+
+
+            <!-- Messages -->
+
+            <div id="message"></div>
+
+
+            <!-- Controls -->
+
+            <div id="controls">
+
+                <span>
+                    <b>W A S D</b> MOVE
+                </span>
+
+                <span>
+                    <b>MOUSE</b> AIM
+                </span>
+
+                <span>
+                    <b>CLICK</b> SHOOT
+                </span>
+
+                <span>
+                    <b>R</b> RELOAD
+                </span>
+
+            </div>
+
         </div>
 
-        <div id="minimapBox">
-            <canvas id="minimap"></canvas>
-        </div>
-
-        <div id="crosshair">
-            <i></i><i></i><i></i><i></i>
-        </div>
-
-        <div id="bottomLeft">
-            <div class="label">HEALTH</div>
-            <div class="bar"><div id="health"></div></div>
-            <div class="label">ARMOR</div>
-            <div class="bar armor"><div id="armor"></div></div>
-        </div>
-
-        <div id="controls">
-            <span>WASD MOVE</span>
-            <span>MOUSE AIM</span>
-            <span>CLICK SHOOT</span>
-            <span>R RELOAD</span>
-        </div>
     </div>
 
-    <div id="startScreen">
-        <div class="startPanel">
-            <div class="bigLogo">VORTEX</div>
-            <h1>BATTLE ZONE</h1>
-            <p>TOP-DOWN BATTLE ROYALE</p>
-            <button id="startButton">DEPLOY</button>
-        </div>
-    </div>
 
-    <div id="endScreen">
-        <div class="startPanel">
-            <div id="endTitle">VICTORY</div>
-            <p id="endText"></p>
-            <button onclick="location.reload()">PLAY AGAIN</button>
-        </div>
-    </div>
-</div>
+    <script src="battle-zone.js"></script>
 
-<script src="battle-zone.js"></script>
 </body>
 </html>
