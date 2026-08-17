@@ -1,331 +1,541 @@
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-html,body{
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    background:#101510;
-    font-family:Arial,Helvetica,sans-serif;
-    user-select:none;
+html,
+body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #101510;
+    font-family: Arial, sans-serif;
+    user-select: none;
 }
 
-#game{
-    position:relative;
-    width:100vw;
-    height:100vh;
-    overflow:hidden;
-    background:#394b35;
+body {
+    cursor: crosshair;
 }
 
-#gameCanvas{
-    position:absolute;
-    inset:0;
-    width:100%;
-    height:100%;
-    cursor:none;
+#game {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    background: #182018;
 }
 
-#hud{
-    position:absolute;
-    inset:0;
-    pointer-events:none;
-    z-index:5;
+#gameCanvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
 }
 
-#topLeft{
-    position:absolute;
-    top:20px;
-    left:22px;
-    display:flex;
-    align-items:center;
-    gap:10px;
+/* =========================
+   HUD
+========================= */
+
+#hud {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    color: white;
 }
 
-.logo{
-    font-size:24px;
-    font-weight:900;
-    letter-spacing:5px;
-    color:#fff;
-    text-shadow:0 3px 12px #000;
+/* Player */
+
+.top-left {
+    position: absolute;
+    top: 22px;
+    left: 22px;
+    width: 250px;
 }
 
-.hudBox{
-    background:rgba(8,12,8,.88);
-    border:1px solid rgba(255,255,255,.16);
-    padding:9px 12px;
-    color:#9da39b;
-    font-size:10px;
+.player-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    background: rgba(10, 14, 10, 0.82);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 10px;
+    backdrop-filter: blur(8px);
 }
 
-.hudBox b{
-    color:#fff;
-    margin-left:5px;
-    font-size:14px;
+.avatar {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 8px;
+    background: #303c2f;
+    border: 1px solid #6f8b68;
+    font-weight: bold;
+    font-size: 18px;
 }
 
-#zoneStatus{
-    position:absolute;
-    top:20px;
-    left:50%;
-    transform:translateX(-50%);
-    padding:9px 18px;
-    background:rgba(26,52,30,.9);
-    border:1px solid rgba(157,210,161,.35);
-    color:#d9f5db;
-    font-size:11px;
-    font-weight:bold;
+.player-card strong {
+    display: block;
+    font-size: 13px;
+    letter-spacing: 1px;
 }
 
-#topRight{
-    position:absolute;
-    top:20px;
-    right:22px;
+.player-card span {
+    display: block;
+    margin-top: 4px;
+    color: #74df74;
+    font-size: 10px;
 }
 
-.weaponBox{
-    min-width:175px;
-    padding:10px 14px;
-    background:rgba(8,12,8,.9);
-    border:1px solid rgba(255,255,255,.16);
-    color:#aaa;
+/* Health */
+
+.health-box {
+    margin-top: 8px;
+    padding: 9px 12px;
+    background: rgba(10, 14, 10, .8);
+    border-radius: 8px;
 }
 
-.weaponBox span{
-    display:block;
-    font-size:9px;
-    margin-bottom:5px;
+.health-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    font-size: 11px;
 }
 
-.weaponBox b{
-    color:white;
-    font-size:20px;
+.health-info span {
+    color: #aab5aa;
 }
 
-#minimapBox{
-    position:absolute;
-    top:68px;
-    right:22px;
-    width:210px;
-    height:210px;
-    padding:4px;
-    background:#101610;
-    border:2px solid rgba(255,255,255,.65);
-    box-shadow:0 7px 25px rgba(0,0,0,.45);
+.health-bar {
+    width: 100%;
+    height: 8px;
+    background: #252b25;
+    border-radius: 10px;
+    overflow: hidden;
 }
 
-#minimap{
-    width:100%;
-    height:100%;
-    display:block;
+#healthBar {
+    width: 100%;
+    height: 100%;
+    background: #55d35b;
+    transition: width .15s;
 }
 
-#crosshair{
-    position:absolute;
-    left:50%;
-    top:50%;
-    width:24px;
-    height:24px;
-    transform:translate(-50%,-50%);
+/* =========================
+   Mini Map
+========================= */
+
+#miniMapContainer {
+    position: absolute;
+    top: 22px;
+    right: 22px;
+
+    width: 190px;
+    height: 190px;
+
+    border: 3px solid rgba(255,255,255,.55);
+    border-radius: 50%;
+
+    overflow: hidden;
+
+    background: #182018;
+
+    box-shadow:
+        0 0 0 4px rgba(0,0,0,.35),
+        0 8px 30px rgba(0,0,0,.5);
 }
 
-#crosshair i{
-    position:absolute;
-    background:#fff;
-    box-shadow:0 0 4px #000;
+#miniMap {
+    width: 100%;
+    height: 100%;
+    display: block;
 }
 
-#crosshair i:nth-child(1){
-    width:2px;
-    height:8px;
-    left:11px;
-    top:0;
+.mini-label {
+    position: absolute;
+    left: 50%;
+    bottom: 7px;
+    transform: translateX(-50%);
+
+    padding: 3px 7px;
+
+    background: rgba(0,0,0,.65);
+    border-radius: 4px;
+
+    font-size: 8px;
+    letter-spacing: 1px;
 }
 
-#crosshair i:nth-child(2){
-    width:2px;
-    height:8px;
-    left:11px;
-    bottom:0;
+/* =========================
+   Weapon
+========================= */
+
+.weapon-hud {
+    position: absolute;
+    right: 25px;
+    bottom: 25px;
+
+    display: flex;
+    align-items: center;
+    gap: 13px;
+
+    padding: 12px 16px;
+
+    background: rgba(10,12,10,.85);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 10px;
+
+    min-width: 235px;
 }
 
-#crosshair i:nth-child(3){
-    width:8px;
-    height:2px;
-    left:0;
-    top:11px;
+.weapon-icon {
+    width: 48px;
+    height: 48px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background: #252d24;
+    border-radius: 8px;
+
+    font-size: 25px;
 }
 
-#crosshair i:nth-child(4){
-    width:8px;
-    height:2px;
-    right:0;
-    top:11px;
+.weapon-info strong {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: #b9c5b8;
 }
 
-#bottomLeft{
-    position:absolute;
-    left:22px;
-    bottom:22px;
-    width:270px;
+.weapon-info span {
+    display: block;
+    margin-top: 5px;
+    font-size: 23px;
+    font-weight: bold;
 }
 
-.label{
-    color:#d7d7d7;
-    font-size:9px;
-    font-weight:bold;
-    margin:5px 0 4px;
+#ammo {
+    color: white;
 }
 
-.bar{
-    width:100%;
-    height:11px;
-    background:rgba(0,0,0,.65);
-    border:1px solid rgba(255,255,255,.15);
+#reserveAmmo {
+    color: #777d77;
+    font-size: 13px;
 }
 
-.bar div{
-    width:100%;
-    height:100%;
-    background:#d9ddd8;
-    transition:.15s;
+/* =========================
+   Zone
+========================= */
+
+.zone-hud {
+    position: absolute;
+    top: 225px;
+    right: 35px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    padding: 8px 15px;
+
+    background: rgba(10,15,10,.75);
+    border-radius: 8px;
+
+    border: 1px solid rgba(120,200,120,.25);
 }
 
-.bar.armor div{
-    background:#7693a7;
+.zone-hud span {
+    font-size: 8px;
+    color: #9ba69b;
+    letter-spacing: 1px;
 }
 
-#controls{
-    position:absolute;
-    bottom:25px;
-    right:22px;
-    display:flex;
-    gap:8px;
+.zone-hud strong {
+    margin-top: 3px;
+    color: #8de28d;
+    font-size: 19px;
 }
 
-#controls span{
-    padding:7px 10px;
-    background:rgba(8,12,8,.75);
-    color:#92988f;
-    border:1px solid rgba(255,255,255,.1);
-    font-size:8px;
+/* Players */
+
+.players-hud {
+    position: absolute;
+    top: 300px;
+    right: 35px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    padding: 8px 17px;
+
+    background: rgba(10,15,10,.75);
+    border-radius: 8px;
 }
 
-#startScreen,
-#endScreen{
-    position:absolute;
-    inset:0;
-    z-index:20;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    background:rgba(5,8,5,.82);
+.players-hud span {
+    color: #929b92;
+    font-size: 8px;
 }
 
-#endScreen{
-    display:none;
+.players-hud strong {
+    margin-top: 2px;
+    font-size: 21px;
 }
 
-.startPanel{
-    text-align:center;
-    padding:55px;
-    min-width:400px;
-    background:rgba(12,17,12,.95);
-    border:1px solid rgba(255,255,255,.18);
-    box-shadow:0 25px 80px rgba(0,0,0,.55);
+/* =========================
+   Crosshair
+========================= */
+
+#crosshair {
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    width: 30px;
+    height: 30px;
+
+    transform: translate(-50%, -50%);
 }
 
-.bigLogo{
-    color:#fff;
-    font-size:55px;
-    font-weight:900;
-    letter-spacing:12px;
+.cross {
+    position: absolute;
+    background: rgba(255,255,255,.9);
 }
 
-.startPanel h1{
-    margin-top:8px;
-    color:#b7c4b6;
-    letter-spacing:5px;
-    font-size:19px;
+.cross.top {
+    width: 2px;
+    height: 8px;
+    left: 14px;
+    top: 0;
 }
 
-.startPanel p{
-    margin:14px 0 28px;
-    color:#747b73;
-    font-size:10px;
-    letter-spacing:3px;
+.cross.right {
+    width: 8px;
+    height: 2px;
+    right: 0;
+    top: 14px;
 }
 
-.startPanel button{
-    border:1px solid #8da48e;
-    background:#405a42;
-    color:white;
-    padding:13px 38px;
-    font-weight:bold;
-    letter-spacing:3px;
-    cursor:pointer;
-    transition:.25s;
+.cross.bottom {
+    width: 2px;
+    height: 8px;
+    left: 14px;
+    bottom: 0;
 }
 
-.startPanel button:hover{
-    background:#5a785c;
-    transform:translateY(-2px);
+.cross.left {
+    width: 8px;
+    height: 2px;
+    left: 0;
+    top: 14px;
 }
 
-#endTitle{
-    color:#fff;
-    font-size:50px;
-    font-weight:900;
-    letter-spacing:7px;
+.cross-dot {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: white;
+    border-radius: 50%;
+    left: 13px;
+    top: 13px;
 }
 
-@media(max-width:700px){
+/* =========================
+   Kill Feed
+========================= */
 
-    #topLeft{
-        left:10px;
-        top:10px;
+#killFeed {
+    position: absolute;
+    top: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    width: 350px;
+}
+
+.kill-message {
+    margin-bottom: 6px;
+
+    padding: 7px 12px;
+
+    text-align: center;
+
+    background: rgba(5,7,5,.7);
+    border-radius: 5px;
+
+    font-size: 11px;
+}
+
+/* =========================
+   Message
+========================= */
+
+#message {
+    position: absolute;
+
+    left: 50%;
+    top: 43%;
+
+    transform: translate(-50%, -50%);
+
+    font-size: 25px;
+    font-weight: bold;
+
+    text-shadow:
+        0 3px 12px black;
+
+    opacity: 0;
+    transition: .25s;
+}
+
+/* =========================
+   Controls
+========================= */
+
+#controls {
+    position: absolute;
+    left: 50%;
+    bottom: 22px;
+
+    transform: translateX(-50%);
+
+    display: flex;
+    gap: 9px;
+
+    padding: 7px 10px;
+
+    background: rgba(5,7,5,.72);
+    border-radius: 7px;
+
+    opacity: .75;
+}
+
+#controls span {
+    color: #aab2aa;
+    font-size: 9px;
+}
+
+#controls b {
+    color: white;
+}
+
+/* =========================
+   Damage Flash
+========================= */
+
+.damage-flash {
+    position: absolute;
+    inset: 0;
+
+    background: rgba(255,0,0,.18);
+
+    pointer-events: none;
+
+    animation: damageFlash .25s forwards;
+}
+
+@keyframes damageFlash {
+    from {
+        opacity: 1;
     }
 
-    .logo{
-        display:none;
+    to {
+        opacity: 0;
+    }
+}
+
+/* =========================
+   Reload
+========================= */
+
+.reload-message {
+    position: absolute;
+
+    left: 50%;
+    bottom: 110px;
+
+    transform: translateX(-50%);
+
+    padding: 8px 15px;
+
+    background: rgba(0,0,0,.75);
+    border-radius: 6px;
+
+    font-size: 11px;
+}
+
+/* =========================
+   Responsive
+========================= */
+
+@media (max-width: 700px) {
+
+    #miniMapContainer {
+        width: 135px;
+        height: 135px;
+        top: 12px;
+        right: 12px;
     }
 
-    #topRight{
-        top:10px;
-        right:10px;
+    .top-left {
+        top: 12px;
+        left: 12px;
+        width: 190px;
     }
 
-    .weaponBox{
-        min-width:130px;
+    .weapon-hud {
+        right: 12px;
+        bottom: 12px;
+        min-width: 190px;
     }
 
-    #minimapBox{
-        width:155px;
-        height:155px;
-        right:10px;
-        top:60px;
+    .zone-hud,
+    .players-hud {
+        display: none;
     }
 
-    #bottomLeft{
-        left:10px;
-        bottom:10px;
-        width:190px;
+    #controls {
+        bottom: 12px;
+        max-width: 90%;
+        flex-wrap: wrap;
+        justify-content: center;
     }
 
-    #controls{
-        display:none;
+    #controls span {
+        font-size: 8px;
+    }
+}
+
+@media (max-width: 450px) {
+
+    .player-card {
+        padding: 7px 9px;
     }
 
-    .startPanel{
-        min-width:0;
-        width:90%;
-        padding:40px 20px;
+    .avatar {
+        width: 32px;
+        height: 32px;
     }
 
-    .bigLogo{
-        font-size:42px;
+    .health-box {
+        padding: 6px 8px;
+    }
+
+    .weapon-hud {
+        transform: scale(.85);
+        transform-origin: bottom right;
+    }
+
+    #miniMapContainer {
+        width: 115px;
+        height: 115px;
     }
 }
