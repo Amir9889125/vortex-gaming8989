@@ -1,855 +1,750 @@
-const canvas=document.getElementById("gameCanvas");
-const ctx=canvas.getContext("2d");
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
 
-const minimap=document.getElementById("minimap");
-const miniCtx=minimap.getContext("2d");
+const miniMap = document.getElementById("miniMap");
+const miniCtx = miniMap.getContext("2d");
 
-const startScreen=document.getElementById("startScreen");
-const endScreen=document.getElementById("endScreen");
-const startButton=document.getElementById("startButton");
+const healthBar = document.getElementById("healthBar");
+const healthText = document.getElementById("healthText");
+const ammoText = document.getElementById("ammo");
+const reserveAmmoText = document.getElementById("reserveAmmo");
+const playersAliveText = document.getElementById("playersAlive");
+const zoneTimerText = document.getElementById("zoneTimer");
+const message = document.getElementById("message");
+const killFeed = document.getElementById("killFeed");
 
-const aliveText=document.getElementById("alive");
-const killsText=document.getElementById("kills");
-const ammoText=document.getElementById("ammo");
+let W = 0;
+let H = 0;
 
-const healthBar=document.getElementById("health");
-const armorBar=document.getElementById("armor");
+function resize() {
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
 
-const zoneStatus=document.getElementById("zoneStatus");
-
-let W=window.innerWidth;
-let H=window.innerHeight;
-
-function resize(){
-    W=canvas.width=window.innerWidth;
-    H=canvas.height=window.innerHeight;
-    minimap.width=202;
-    minimap.height=202;
+    miniMap.width = 190;
+    miniMap.height = 190;
 }
 
-window.addEventListener("resize",resize);
+window.addEventListener("resize", resize);
 resize();
 
-const WORLD={
-    width:6000,
-    height:6000
+/* =========================
+   WORLD
+========================= */
+
+const WORLD = {
+    width: 5000,
+    height: 5000
 };
 
-const camera={
-    x:0,
-    y:0
+const camera = {
+    x: 0,
+    y: 0
 };
 
-const player={
-    x:3000,
-    y:3000,
-    radius:18,
-    speed:4,
-    angle:0,
-    health:100,
-    armor:100,
-    ammo:30,
-    reserve:120,
-    kills:0
-};
+/* =========================
+   INPUT
+========================= */
 
-const mouse={
-    x:W/2,
-    y:H/2,
-    down:false
-};
+const keys = {};
 
-const keys={};
+window.addEventListener("keydown", e => {
+    keys[e.key.toLowerCase()] = true;
 
-let gameStarted=false;
-let shootCooldown=0;
-
-const buildings=[];
-const trees=[];
-const rocks=[];
-const roads=[];
-const loot=[];
-const enemies=[];
-const bullets=[];
-
-function random(min,max){
-    return Math.random()*(max-min)+min;
-}
-
-function distance(a,b,c,d){
-    return Math.hypot(a-c,b-d);
-}
-
-function createMap(){
-
-    roads.push(
-        {x:0,y:2820,w:6000,h:180},
-        {x:2820,y:0,w:180,h:6000},
-        {x:400,y:1050,w:5200,h:130},
-        {x:1000,y:400,w:130,h:5200},
-        {x:700,y:4000,w:4600,h:120}
-    );
-
-    for(let i=0;i<65;i++){
-
-        const w=random(110,300);
-        const h=random(90,240);
-
-        buildings.push({
-            x:random(150,WORLD.width-w-150),
-            y:random(150,WORLD.height-h-150),
-            w,
-            h
-        });
-    }
-
-    for(let i=0;i<420;i++){
-
-        trees.push({
-            x:random(50,WORLD.width-50),
-            y:random(50,WORLD.height-50),
-            r:random(12,27)
-        });
-    }
-
-    for(let i=0;i<190;i++){
-
-        rocks.push({
-            x:random(50,WORLD.width-50),
-            y:random(50,WORLD.height-50),
-            r:random(7,20)
-        });
-    }
-
-    for(let i=0;i<130;i++){
-
-        loot.push({
-            x:random(100,WORLD.width-100),
-            y:random(100,WORLD.height-100),
-            type:Math.random()>.5?"ammo":"armor",
-            taken:false
-        });
-    }
-
-    for(let i=0;i<24;i++){
-
-        enemies.push({
-            x:random(300,WORLD.width-300),
-            y:random(300,WORLD.height-300),
-            radius:17,
-            health:100,
-            speed:random(.45,1),
-            cooldown:random(20,90)
-        });
-    }
-}
-
-createMap();
-
-const zone={
-    x:3000,
-    y:3000,
-    radius:2550,
-    targetRadius:2550,
-    timer:0,
-    phase:0
-};
-
-function updateZone(){
-
-    zone.timer++;
-
-    if(zone.timer>1000){
-
-        zone.phase++;
-
-        zone.targetRadius=Math.max(
-            500,
-            zone.targetRadius-400
-        );
-
-        zone.timer=0;
-    }
-
-    zone.radius+=(zone.targetRadius-zone.radius)*.0015;
-
-    const d=distance(
-        player.x,
-        player.y,
-        zone.x,
-        zone.y
-    );
-
-    if(d>zone.radius){
-
-        player.health-=.035;
-
-        zoneStatus.textContent="⚠ OUTSIDE SAFE ZONE";
-        zoneStatus.style.background="rgba(90,30,25,.95)";
-
-    }else{
-
-        zoneStatus.textContent="SAFE ZONE";
-        zoneStatus.style.background="rgba(26,52,30,.9)";
-    }
-}
-
-window.addEventListener("keydown",e=>{
-
-    keys[e.key.toLowerCase()]=true;
-
-    if(e.key.toLowerCase()==="r"){
+    if (e.key.toLowerCase() === "r") {
         reload();
     }
 });
 
-window.addEventListener("keyup",e=>{
-    keys[e.key.toLowerCase()]=false;
+window.addEventListener("keyup", e => {
+    keys[e.key.toLowerCase()] = false;
 });
 
-canvas.addEventListener("mousemove",e=>{
+const mouse = {
+    x: 0,
+    y: 0,
+    down: false
+};
 
-    mouse.x=e.clientX;
-    mouse.y=e.clientY;
+window.addEventListener("mousemove", e => {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
 });
 
-canvas.addEventListener("mousedown",e=>{
-
-    if(e.button===0){
-        mouse.down=true;
-    }
+window.addEventListener("mousedown", () => {
+    mouse.down = true;
 });
 
-window.addEventListener("mouseup",e=>{
-
-    if(e.button===0){
-        mouse.down=false;
-    }
+window.addEventListener("mouseup", () => {
+    mouse.down = false;
 });
 
-function updatePlayer(){
+/* =========================
+   PLAYER
+========================= */
 
-    let dx=0;
-    let dy=0;
+const player = {
+    x: WORLD.width / 2,
+    y: WORLD.height / 2,
 
-    if(keys.w||keys.arrowup)dy--;
-    if(keys.s||keys.arrowdown)dy++;
-    if(keys.a||keys.arrowleft)dx--;
-    if(keys.d||keys.arrowright)dx++;
+    radius: 20,
 
-    if(dx||dy){
+    speed: 3.6,
 
-        const len=Math.hypot(dx,dy);
+    health: 100,
 
-        dx/=len;
-        dy/=len;
+    angle: 0,
 
-        player.x+=dx*player.speed;
-        player.y+=dy*player.speed;
-    }
+    ammo: 30,
+    reserveAmmo: 120,
 
-    player.x=Math.max(
-        30,
-        Math.min(WORLD.width-30,player.x)
+    fireCooldown: 0,
+
+    kills: 0
+};
+
+/* =========================
+   CAMERA
+========================= */
+
+function updateCamera() {
+
+    camera.x = player.x - W / 2;
+    camera.y = player.y - H / 2;
+
+    camera.x = Math.max(
+        0,
+        Math.min(camera.x, WORLD.width - W)
     );
 
-    player.y=Math.max(
-        30,
-        Math.min(WORLD.height-30,player.y)
-    );
-
-    const mx=mouse.x+camera.x;
-    const my=mouse.y+camera.y;
-
-    player.angle=Math.atan2(
-        my-player.y,
-        mx-player.x
+    camera.y = Math.max(
+        0,
+        Math.min(camera.y, WORLD.height - H)
     );
 }
 
-function updateCamera(){
+/* =========================
+   TERRAIN
+========================= */
 
-    camera.x=player.x-W/2;
-    camera.y=player.y-H/2;
+const trees = [];
+const rocks = [];
+const buildings = [];
+const roads = [];
+const bushes = [];
+const crates = [];
+const waterAreas = [];
 
-    camera.x=Math.max(
-        0,
-        Math.min(WORLD.width-W,camera.x)
+/* deterministic random */
+
+let seed = 12345;
+
+function random() {
+    seed = (seed * 9301 + 49297) % 233280;
+    return seed / 233280;
+}
+
+/* Water */
+
+waterAreas.push({
+    x: 3300,
+    y: 500,
+    width: 1200,
+    height: 850
+});
+
+waterAreas.push({
+    x: 200,
+    y: 3400,
+    width: 1100,
+    height: 700
+});
+
+/* Roads */
+
+roads.push({
+    x: 0,
+    y: 2450,
+    width: WORLD.width,
+    height: 150
+});
+
+roads.push({
+    x: 2380,
+    y: 0,
+    width: 170,
+    height: WORLD.height
+});
+
+roads.push({
+    x: 900,
+    y: 1200,
+    width: 2500,
+    height: 100
+});
+
+roads.push({
+    x: 1300,
+    y: 3500,
+    width: 2600,
+    height: 100
+});
+
+/* Trees */
+
+for (let i = 0; i < 450; i++) {
+
+    const x = random() * WORLD.width;
+    const y = random() * WORLD.height;
+
+    trees.push({
+        x,
+        y,
+        size: 14 + random() * 14
+    });
+}
+
+/* Bushes */
+
+for (let i = 0; i < 250; i++) {
+
+    bushes.push({
+        x: random() * WORLD.width,
+        y: random() * WORLD.height,
+        size: 8 + random() * 10
+    });
+}
+
+/* Rocks */
+
+for (let i = 0; i < 180; i++) {
+
+    rocks.push({
+        x: random() * WORLD.width,
+        y: random() * WORLD.height,
+        size: 8 + random() * 12
+    });
+}
+
+/* Buildings */
+
+const buildingPositions = [
+    [500, 500],
+    [800, 650],
+    [1150, 500],
+    [1500, 650],
+
+    [3300, 500],
+    [3700, 700],
+    [4100, 550],
+
+    [500, 1800],
+    [900, 1900],
+    [1300, 1750],
+
+    [3000, 1800],
+    [3500, 2000],
+    [4000, 1800],
+
+    [500, 3000],
+    [900, 3200],
+    [1400, 3000],
+
+    [2900, 3200],
+    [3400, 3000],
+    [3900, 3300]
+];
+
+buildingPositions.forEach(pos => {
+
+    buildings.push({
+        x: pos[0],
+        y: pos[1],
+
+        width: 180 + random() * 120,
+        height: 130 + random() * 100
+    });
+});
+
+/* Crates */
+
+for (let i = 0; i < 100; i++) {
+
+    crates.push({
+        x: 200 + random() * 4600,
+        y: 200 + random() * 4600
+    });
+}
+
+/* =========================
+   ENEMIES
+========================= */
+
+const enemies = [];
+
+for (let i = 0; i < 24; i++) {
+
+    let x;
+    let y;
+
+    do {
+        x = 300 + random() * 4400;
+        y = 300 + random() * 4400;
+    } while (
+        Math.hypot(
+            x - player.x,
+            y - player.y
+        ) < 500
     );
 
-    camera.y=Math.max(
-        0,
-        Math.min(WORLD.height-H,camera.y)
+    enemies.push({
+
+        x,
+        y,
+
+        radius: 18,
+
+        health: 100,
+
+        angle: random() * Math.PI * 2,
+
+        speed: 0.7 + random() * 0.7,
+
+        moveTimer: random() * 120,
+
+        shootTimer: 60 + random() * 180,
+
+        alive: true
+    });
+}
+
+/* =========================
+   LOOT
+========================= */
+
+const loot = [];
+
+for (let i = 0; i < 70; i++) {
+
+    loot.push({
+
+        x: 200 + random() * 4600,
+        y: 200 + random() * 4600,
+
+        type: random() > .5
+            ? "ammo"
+            : "medkit",
+
+        collected: false
+    });
+}
+
+/* =========================
+   SAFE ZONE
+========================= */
+
+const zone = {
+
+    x: WORLD.width / 2,
+    y: WORLD.height / 2,
+
+    radius: 2200,
+
+    targetRadius: 2200,
+
+    timer: 60
+};
+
+/* =========================
+   BULLETS
+========================= */
+
+const bullets = [];
+
+/* =========================
+   PLAYER MOVEMENT
+========================= */
+
+function updatePlayer() {
+
+    let dx = 0;
+    let dy = 0;
+
+    if (keys["w"]) dy -= 1;
+    if (keys["s"]) dy += 1;
+    if (keys["a"]) dx -= 1;
+    if (keys["d"]) dx += 1;
+
+    if (dx !== 0 || dy !== 0) {
+
+        const length = Math.hypot(dx, dy);
+
+        dx /= length;
+        dy /= length;
+
+        player.x += dx * player.speed;
+        player.y += dy * player.speed;
+    }
+
+    player.x = Math.max(
+        player.radius,
+        Math.min(
+            WORLD.width - player.radius,
+            player.x
+        )
+    );
+
+    player.y = Math.max(
+        player.radius,
+        Math.min(
+            WORLD.height - player.radius,
+            player.y
+        )
+    );
+
+    player.angle = Math.atan2(
+        mouse.y - H / 2,
+        mouse.x - W / 2
     );
 }
 
-function shoot(){
+/* =========================
+   SHOOTING
+========================= */
 
-    if(shootCooldown>0)return;
+function shoot() {
 
-    if(player.ammo<=0){
+    if (player.fireCooldown > 0) return;
+
+    if (player.ammo <= 0) {
+
         reload();
+
         return;
     }
 
     player.ammo--;
 
-    shootCooldown=9;
+    player.fireCooldown = 8;
 
     bullets.push({
-        x:player.x+Math.cos(player.angle)*24,
-        y:player.y+Math.sin(player.angle)*24,
-        angle:player.angle,
-        speed:16,
-        life:70
-    });
 
-    updateAmmo();
+        x: player.x,
+        y: player.y,
+
+        angle: player.angle,
+
+        speed: 16,
+
+        life: 70,
+
+        owner: "player"
+    });
 }
 
-function updateBullets(){
+/* =========================
+   RELOAD
+========================= */
 
-    if(shootCooldown>0)shootCooldown--;
+let reloading = false;
 
-    for(let i=bullets.length-1;i>=0;i--){
+function reload() {
 
-        const b=bullets[i];
+    if (reloading) return;
 
-        b.x+=Math.cos(b.angle)*b.speed;
-        b.y+=Math.sin(b.angle)*b.speed;
+    if (player.ammo >= 30) return;
 
-        b.life--;
+    if (player.reserveAmmo <= 0) return;
 
-        let removed=false;
+    reloading = true;
 
-        for(let j=enemies.length-1;j>=0;j--){
+    showMessage("RELOADING");
 
-            const enemy=enemies[j];
+    setTimeout(() => {
 
-            if(distance(
-                b.x,b.y,
-                enemy.x,enemy.y
-            )<enemy.radius+5){
+        const needed = 30 - player.ammo;
 
-                enemy.health-=50;
+        const amount = Math.min(
+            needed,
+            player.reserveAmmo
+        );
 
-                bullets.splice(i,1);
-                removed=true;
+        player.ammo += amount;
+        player.reserveAmmo -= amount;
 
-                if(enemy.health<=0){
+        reloading = false;
 
-                    enemies.splice(j,1);
+    }, 1000);
+}
 
-                    player.kills++;
+/* =========================
+   BULLETS
+========================= */
 
-                    killsText.textContent=player.kills;
-                    aliveText.textContent=enemies.length+1;
-                }
+function updateBullets() {
 
-                break;
-            }
+    bullets.forEach((bullet, index) => {
+
+        bullet.x += Math.cos(bullet.angle) * bullet.speed;
+        bullet.y += Math.sin(bullet.angle) * bullet.speed;
+
+        bullet.life--;
+
+        if (bullet.life <= 0) {
+
+            bullets.splice(index, 1);
+
+            return;
         }
 
-        if(!removed&&b.life<=0){
-            bullets.splice(i,1);
+        if (bullet.owner === "player") {
+
+            enemies.forEach(enemy => {
+
+                if (!enemy.alive) return;
+
+                const distance = Math.hypot(
+                    bullet.x - enemy.x,
+                    bullet.y - enemy.y
+                );
+
+                if (distance < enemy.radius + 5) {
+
+                    enemy.health -= 35;
+
+                    bullets.splice(index, 1);
+
+                    if (enemy.health <= 0) {
+
+                        enemy.alive = false;
+
+                        player.kills++;
+
+                        addKillFeed(
+                            "VORTEX eliminated enemy"
+                        );
+                    }
+                }
+            });
+        }
+    });
+}
+
+/* =========================
+   ENEMY AI
+========================= */
+
+function updateEnemies() {
+
+    enemies.forEach(enemy => {
+
+        if (!enemy.alive) return;
+
+        const distance = Math.hypot(
+            player.x - enemy.x,
+            player.y - enemy.y
+        );
+
+        if (distance < 650) {
+
+            enemy.angle = Math.atan2(
+                player.y - enemy.y,
+                player.x - enemy.x
+            );
+
+            enemy.x +=
+                Math.cos(enemy.angle) *
+                enemy.speed;
+
+            enemy.y +=
+                Math.sin(enemy.angle) *
+                enemy.speed;
+
+            enemy.shootTimer--;
+
+            if (
+                enemy.shootTimer <= 0 &&
+                distance < 500
+            ) {
+
+                enemyShoot(enemy);
+
+                enemy.shootTimer =
+                    80 + random() * 100;
+            }
+
+        } else {
+
+            enemy.moveTimer--;
+
+            if (enemy.moveTimer <= 0) {
+
+                enemy.angle =
+                    random() * Math.PI * 2;
+
+                enemy.moveTimer =
+                    60 + random() * 160;
+            }
+
+            enemy.x +=
+                Math.cos(enemy.angle) *
+                enemy.speed;
+
+            enemy.y +=
+                Math.sin(enemy.angle) *
+                enemy.speed;
+        }
+
+        enemy.x = Math.max(
+            20,
+            Math.min(WORLD.width - 20, enemy.x)
+        );
+
+        enemy.y = Math.max(
+            20,
+            Math.min(WORLD.height - 20, enemy.y)
+        );
+    });
+}
+
+/* =========================
+   ENEMY SHOOT
+========================= */
+
+function enemyShoot(enemy) {
+
+    bullets.push({
+
+        x: enemy.x,
+        y: enemy.y,
+
+        angle: enemy.angle,
+
+        speed: 9,
+
+        life: 80,
+
+        owner: "enemy"
+    });
+}
+
+/* =========================
+   LOOT
+========================= */
+
+function updateLoot() {
+
+    loot.forEach(item => {
+
+        if (item.collected) return;
+
+        const distance = Math.hypot(
+            player.x - item.x,
+            player.y - item.y
+        );
+
+        if (distance < 35) {
+
+            item.collected = true;
+
+            if (item.type === "ammo") {
+
+                player.reserveAmmo += 30;
+
+                showMessage("+30 AMMO");
+
+            } else {
+
+                player.health =
+                    Math.min(100, player.health + 30);
+
+                showMessage("+30 HP");
+            }
+        }
+    });
+}
+
+/* =========================
+   SAFE ZONE
+========================= */
+
+function updateZone() {
+
+    zone.timer -= 1 / 60;
+
+    if (zone.timer <= 0) {
+
+        zone.targetRadius =
+            Math.max(
+                500,
+                zone.targetRadius - 350
+            );
+
+        zone.timer = 45;
+    }
+
+    zone.radius +=
+        (zone.targetRadius - zone.radius) *
+        0.002;
+
+    const distance = Math.hypot(
+        player.x - zone.x,
+        player.y - zone.y
+    );
+
+    if (distance > zone.radius) {
+
+        player.health -= 0.035;
+
+        showDamage();
+
+        if (player.health <= 0) {
+
+            player.health = 0;
+
+            gameOver();
         }
     }
 }
 
-function reload(){
+/* =========================
+   HUD
+========================= */
 
-    if(player.ammo>=30)return;
-    if(player.reserve<=0)return;
+function updateHUD() {
 
-    const needed=30-player.ammo;
-    const amount=Math.min(
-        needed,
-        player.reserve
-    );
+    healthBar.style.width =
+        player.health + "%";
 
-    player.ammo+=amount;
-    player.reserve-=amount;
+    healthText.textContent =
+        Math.ceil(player.health);
 
-    updateAmmo();
+    ammoText.textContent =
+        player.ammo;
+
+    reserveAmmoText.textContent =
+        player.reserveAmmo;
+
+    playersAliveText.textContent =
+        enemies.filter(e => e.alive).length + 1;
+
+    zoneTimerText.textContent =
+        Math.ceil(zone.timer);
 }
 
-function updateAmmo(){
+/* =========================
+   DRAW WORLD
+========================= */
 
-    ammoText.textContent=
-        `${player.ammo} / ${player.reserve}`;
-}
+function drawWorld() {
 
-function updateEnemies(){
+    ctx.fillStyle = "#526b43";
 
-    enemies.forEach(enemy=>{
-
-        const dx=player.x-enemy.x;
-        const dy=player.y-enemy.y;
-
-        const d=Math.hypot(dx,dy);
-
-        if(d<800&&d>90){
-
-            enemy.x+=(dx/d)*enemy.speed;
-            enemy.y+=(dy/d)*enemy.speed;
-        }
-
-        if(d<45&&enemy.cooldown<=0){
-
-            if(player.armor>0){
-                player.armor=Math.max(
-                    0,
-                    player.armor-8
-                );
-            }else{
-                player.health-=8;
-            }
-
-            enemy.cooldown=65;
-        }
-
-        enemy.cooldown--;
-
-        enemy.x=Math.max(
-            20,
-            Math.min(WORLD.width-20,enemy.x)
-        );
-
-        enemy.y=Math.max(
-            20,
-            Math.min(WORLD.height-20,enemy.y)
-        );
-    });
-}
-
-function updateLoot(){
-
-    loot.forEach(item=>{
-
-        if(item.taken)return;
-
-        if(distance(
-            player.x,player.y,
-            item.x,item.y
-        )<38){
-
-            if(item.type==="ammo"){
-
-                player.reserve+=30;
-
-            }else{
-
-                player.armor=Math.min(
-                    100,
-                    player.armor+35
-                );
-            }
-
-            item.taken=true;
-
-            updateAmmo();
-        }
-    });
-}
-
-function drawGround(){
-
-    ctx.fillStyle="#3d5138";
     ctx.fillRect(
         0,
         0,
-        WORLD.width,
-        WORLD.height
+        W,
+        H
     );
-
-    for(let x=0;x<WORLD.width;x+=200){
-
-        for(let y=0;y<WORLD.height;y+=200){
-
-            if((x+y)%400===0){
-
-                ctx.fillStyle="rgba(255,255,255,.018)";
-
-            }else{
-
-                ctx.fillStyle="rgba(0,0,0,.018)";
-            }
-
-            ctx.fillRect(x,y,200,200);
-        }
-    }
-}
-
-function drawRoads(){
-
-    roads.forEach(road=>{
-
-        ctx.fillStyle="#41423e";
-
-        ctx.fillRect(
-            road.x,
-            road.y,
-            road.w,
-            road.h
-        );
-
-        ctx.strokeStyle="rgba(255,255,255,.12)";
-        ctx.lineWidth=3;
-        ctx.setLineDash([30,28]);
-
-        ctx.beginPath();
-
-        if(road.w>road.h){
-
-            ctx.moveTo(
-                road.x,
-                road.y+road.h/2
-            );
-
-            ctx.lineTo(
-                road.x+road.w,
-                road.y+road.h/2
-            );
-
-        }else{
-
-            ctx.moveTo(
-                road.x+road.w/2,
-                road.y
-            );
-
-            ctx.lineTo(
-                road.x+road.w/2,
-                road.y+road.h
-            );
-        }
-
-        ctx.stroke();
-
-        ctx.setLineDash([]);
-    });
-}
-
-function drawBuildings(){
-
-    buildings.forEach(b=>{
-
-        ctx.fillStyle="rgba(0,0,0,.3)";
-
-        ctx.fillRect(
-            b.x+9,
-            b.y+11,
-            b.w,
-            b.h
-        );
-
-        ctx.fillStyle="#62665e";
-
-        ctx.fillRect(
-            b.x,
-            b.y,
-            b.w,
-            b.h
-        );
-
-        ctx.strokeStyle="#252a25";
-        ctx.lineWidth=5;
-
-        ctx.strokeRect(
-            b.x,
-            b.y,
-            b.w,
-            b.h
-        );
-
-        ctx.fillStyle="#454941";
-
-        for(let x=b.x+15;x<b.x+b.w-15;x+=35){
-
-            ctx.fillRect(
-                x,
-                b.y+12,
-                16,
-                8
-            );
-        }
-    });
-}
-
-function drawTrees(){
-
-    trees.forEach(t=>{
-
-        ctx.fillStyle="rgba(0,0,0,.25)";
-
-        ctx.beginPath();
-
-        ctx.arc(
-            t.x+5,
-            t.y+7,
-            t.r,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-
-        ctx.fillStyle="#243b26";
-
-        ctx.beginPath();
-
-        ctx.arc(
-            t.x,
-            t.y,
-            t.r,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-
-        ctx.fillStyle="#405d3a";
-
-        ctx.beginPath();
-
-        ctx.arc(
-            t.x-5,
-            t.y-6,
-            t.r*.65,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-    });
-}
-
-function drawRocks(){
-
-    rocks.forEach(r=>{
-
-        ctx.fillStyle="#666b62";
-
-        ctx.beginPath();
-
-        ctx.arc(
-            r.x,
-            r.y,
-            r.r,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-    });
-}
-
-function drawLoot(){
-
-    loot.forEach(item=>{
-
-        if(item.taken)return;
-
-        ctx.fillStyle=
-            item.type==="ammo"
-            ?"#d0b34b"
-            :"#6c99b6";
-
-        ctx.fillRect(
-            item.x-8,
-            item.y-8,
-            16,
-            16
-        );
-
-        ctx.strokeStyle="rgba(255,255,255,.8)";
-        ctx.strokeRect(
-            item.x-8,
-            item.y-8,
-            16,
-            16
-        );
-    });
-}
-
-function drawEnemies(){
-
-    enemies.forEach(enemy=>{
-
-        ctx.fillStyle="rgba(0,0,0,.3)";
-
-        ctx.beginPath();
-
-        ctx.ellipse(
-            enemy.x+3,
-            enemy.y+7,
-            19,
-            11,
-            0,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-
-        ctx.fillStyle="#8b3e36";
-
-        ctx.beginPath();
-
-        ctx.arc(
-            enemy.x,
-            enemy.y,
-            enemy.radius,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-
-        ctx.fillStyle="#e06358";
-
-        ctx.fillRect(
-            enemy.x-13,
-            enemy.y-27,
-            26*(enemy.health/100),
-            4
-        );
-    });
-}
-
-function drawBullets(){
-
-    bullets.forEach(b=>{
-
-        ctx.fillStyle="#f0dc94";
-
-        ctx.beginPath();
-
-        ctx.arc(
-            b.x,
-            b.y,
-            4,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-    });
-}
-
-function drawPlayer(){
-
-    ctx.fillStyle="rgba(0,0,0,.35)";
-
-    ctx.beginPath();
-
-    ctx.ellipse(
-        player.x+3,
-        player.y+8,
-        23,
-        12,
-        0,
-        0,
-        Math.PI*2
-    );
-
-    ctx.fill();
-
-    ctx.fillStyle="#d7d9d4";
-
-    ctx.beginPath();
-
-    ctx.arc(
-        player.x,
-        player.y,
-        player.radius,
-        0,
-        Math.PI*2
-    );
-
-    ctx.fill();
-
-    ctx.strokeStyle="#1e241f";
-    ctx.lineWidth=7;
-
-    ctx.beginPath();
-
-    ctx.moveTo(
-        player.x,
-        player.y
-    );
-
-    ctx.lineTo(
-        player.x+
-        Math.cos(player.angle)*30,
-        player.y+
-        Math.sin(player.angle)*30
-    );
-
-    ctx.stroke();
-
-    ctx.fillStyle="#fff";
-
-    ctx.beginPath();
-
-    ctx.arc(
-        player.x,
-        player.y,
-        5,
-        0,
-        Math.PI*2
-    );
-
-    ctx.fill();
-}
-
-function drawZone(){
-
-    ctx.save();
-
-    ctx.fillStyle="rgba(40,80,110,.16)";
-
-    ctx.beginPath();
-
-    ctx.rect(
-        0,
-        0,
-        WORLD.width,
-        WORLD.height
-    );
-
-    ctx.arc(
-        zone.x,
-        zone.y,
-        zone.radius,
-        0,
-        Math.PI*2,
-        true
-    );
-
-    ctx.fill();
-
-    ctx.strokeStyle="rgba(190,225,255,.9)";
-    ctx.lineWidth=9;
-
-    ctx.beginPath();
-
-    ctx.arc(
-        zone.x,
-        zone.y,
-        zone.radius,
-        0,
-        Math.PI*2
-    );
-
-    ctx.stroke();
-
-    ctx.restore();
-}
-
-function drawWorld(){
-
-    ctx.clearRect(0,0,W,H);
 
     ctx.save();
 
@@ -859,23 +754,792 @@ function drawWorld(){
     );
 
     drawGround();
+    drawWater();
     drawRoads();
     drawBuildings();
+    drawCrates();
     drawRocks();
+    drawBushes();
     drawTrees();
     drawLoot();
     drawZone();
-    drawEnemies();
     drawBullets();
+    drawEnemies();
     drawPlayer();
 
     ctx.restore();
 }
 
-function drawMinimap(){
+/* =========================
+   GROUND
+========================= */
 
-    const size=minimap.width;
-    const scale=size/WORLD.width;
+function drawGround() {
+
+    ctx.fillStyle = "#536b43";
+
+    ctx.fillRect(
+        0,
+        0,
+        WORLD.width,
+        WORLD.height
+    );
+
+    /* grass texture */
+
+    ctx.strokeStyle = "rgba(20,45,20,.15)";
+    ctx.lineWidth = 1;
+
+    for (
+        let x = 0;
+        x < WORLD.width;
+        x += 45
+    ) {
+
+        for (
+            let y = 0;
+            y < WORLD.height;
+            y += 45
+        ) {
+
+            ctx.beginPath();
+
+            ctx.moveTo(x + 5, y + 10);
+            ctx.lineTo(x + 8, y + 4);
+
+            ctx.stroke();
+        }
+    }
+}
+
+/* =========================
+   WATER
+========================= */
+
+function drawWater() {
+
+    waterAreas.forEach(water => {
+
+        ctx.fillStyle = "#3e7180";
+
+        ctx.fillRect(
+            water.x,
+            water.y,
+            water.width,
+            water.height
+        );
+
+        ctx.strokeStyle =
+            "rgba(180,230,240,.2)";
+
+        for (
+            let y = water.y + 20;
+            y < water.y + water.height;
+            y += 35
+        ) {
+
+            ctx.beginPath();
+
+            ctx.moveTo(
+                water.x + 20,
+                y
+            );
+
+            ctx.lineTo(
+                water.x + water.width - 20,
+                y
+            );
+
+            ctx.stroke();
+        }
+    });
+}
+
+/* =========================
+   ROADS
+========================= */
+
+function drawRoads() {
+
+    roads.forEach(road => {
+
+        ctx.fillStyle = "#5c5c55";
+
+        ctx.fillRect(
+            road.x,
+            road.y,
+            road.width,
+            road.height
+        );
+
+        ctx.strokeStyle =
+            "rgba(255,230,120,.45)";
+
+        ctx.lineWidth = 4;
+
+        if (road.width > road.height) {
+
+            for (
+                let x = road.x;
+                x < road.x + road.width;
+                x += 60
+            ) {
+
+                ctx.beginPath();
+
+                ctx.moveTo(
+                    x,
+                    road.y + road.height / 2
+                );
+
+                ctx.lineTo(
+                    x + 30,
+                    road.y + road.height / 2
+                );
+
+                ctx.stroke();
+            }
+
+        } else {
+
+            for (
+                let y = road.y;
+                y < road.y + road.height;
+                y += 60
+            ) {
+
+                ctx.beginPath();
+
+                ctx.moveTo(
+                    road.x + road.width / 2,
+                    y
+                );
+
+                ctx.lineTo(
+                    road.x + road.width / 2,
+                    y + 30
+                );
+
+                ctx.stroke();
+            }
+        }
+    });
+}
+
+/* =========================
+   BUILDINGS
+========================= */
+
+function drawBuildings() {
+
+    buildings.forEach(building => {
+
+        ctx.fillStyle = "#454841";
+
+        ctx.fillRect(
+            building.x,
+            building.y,
+            building.width,
+            building.height
+        );
+
+        ctx.fillStyle = "#252824";
+
+        ctx.fillRect(
+            building.x - 5,
+            building.y - 12,
+            building.width + 10,
+            15
+        );
+
+        /* windows */
+
+        ctx.fillStyle = "#91a37e";
+
+        for (
+            let x = building.x + 25;
+            x < building.x + building.width - 15;
+            x += 42
+        ) {
+
+            for (
+                let y = building.y + 25;
+                y < building.y + building.height - 15;
+                y += 40
+            ) {
+
+                ctx.fillRect(
+                    x,
+                    y,
+                    16,
+                    12
+                );
+            }
+        }
+
+        /* door */
+
+        ctx.fillStyle = "#22231f";
+
+        ctx.fillRect(
+            building.x +
+            building.width / 2 - 12,
+
+            building.y +
+            building.height - 35,
+
+            24,
+            35
+        );
+    });
+}
+
+/* =========================
+   CRATES
+========================= */
+
+function drawCrates() {
+
+    crates.forEach(crate => {
+
+        if (
+            crate.x < camera.x - 40 ||
+            crate.x > camera.x + W + 40 ||
+            crate.y < camera.y - 40 ||
+            crate.y > camera.y + H + 40
+        ) return;
+
+        ctx.fillStyle = "#78562f";
+
+        ctx.fillRect(
+            crate.x - 12,
+            crate.y - 12,
+            24,
+            24
+        );
+
+        ctx.strokeStyle = "#3f2c18";
+
+        ctx.strokeRect(
+            crate.x - 12,
+            crate.y - 12,
+            24,
+            24
+        );
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            crate.x - 12,
+            crate.y - 12
+        );
+
+        ctx.lineTo(
+            crate.x + 12,
+            crate.y + 12
+        );
+
+        ctx.moveTo(
+            crate.x + 12,
+            crate.y - 12
+        );
+
+        ctx.lineTo(
+            crate.x - 12,
+            crate.y + 12
+        );
+
+        ctx.stroke();
+    });
+}
+
+/* =========================
+   ROCKS
+========================= */
+
+function drawRocks() {
+
+    rocks.forEach(rock => {
+
+        if (
+            rock.x < camera.x - 50 ||
+            rock.x > camera.x + W + 50 ||
+            rock.y < camera.y - 50 ||
+            rock.y > camera.y + H + 50
+        ) return;
+
+        ctx.fillStyle = "#62665d";
+
+        ctx.beginPath();
+
+        ctx.arc(
+            rock.x,
+            rock.y,
+            rock.size,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.fill();
+
+        ctx.fillStyle = "#7c8177";
+
+        ctx.beginPath();
+
+        ctx.arc(
+            rock.x - rock.size * .3,
+            rock.y - rock.size * .3,
+            rock.size * .35,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.fill();
+    });
+}
+
+/* =========================
+   BUSHES
+========================= */
+
+function drawBushes() {
+
+    bushes.forEach(bush => {
+
+        if (
+            bush.x < camera.x - 40 ||
+            bush.x > camera.x + W + 40 ||
+            bush.y < camera.y - 40 ||
+            bush.y > camera.y + H + 40
+        ) return;
+
+        ctx.fillStyle = "#294b2a";
+
+        ctx.beginPath();
+
+        ctx.arc(
+            bush.x,
+            bush.y,
+            bush.size,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.fill();
+
+        ctx.fillStyle = "#386238";
+
+        ctx.beginPath();
+
+        ctx.arc(
+            bush.x - 5,
+            bush.y - 5,
+            bush.size * .55,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.fill();
+    });
+}
+
+/* =========================
+   TREES
+========================= */
+
+function drawTrees() {
+
+    trees.forEach(tree => {
+
+        if (
+            tree.x < camera.x - 70 ||
+            tree.x > camera.x + W + 70 ||
+            tree.y < camera.y - 70 ||
+            tree.y > camera.y + H + 70
+        ) return;
+
+        /* shadow */
+
+        ctx.fillStyle = "rgba(0,0,0,.25)";
+
+        ctx.beginPath();
+
+        ctx.ellipse(
+            tree.x,
+            tree.y + 12,
+            tree.size * .9,
+            tree.size * .45,
+            0,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.fill();
+
+        /* trunk */
+
+        ctx.fillStyle = "#60472b";
+
+        ctx.fillRect(
+            tree.x - 5,
+            tree.y,
+            10,
+            tree.size
+        );
+
+        /* crown */
+
+        ctx.fillStyle = "#1d4d27";
+
+        ctx.beginPath();
+
+        ctx.arc(
+            tree.x,
+            tree.y - 10,
+            tree.size,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.fill();
+
+        ctx.fillStyle = "#2f6735";
+
+        ctx.beginPath();
+
+        ctx.arc(
+            tree.x - 7,
+            tree.y - 15,
+            tree.size * .55,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.fill();
+    });
+}
+
+/* =========================
+   LOOT DRAW
+========================= */
+
+function drawLoot() {
+
+    loot.forEach(item => {
+
+        if (item.collected) return;
+
+        ctx.fillStyle =
+            item.type === "ammo"
+                ? "#e1bb4d"
+                : "#66c66b";
+
+        ctx.fillRect(
+            item.x - 8,
+            item.y - 8,
+            16,
+            16
+        );
+
+        ctx.strokeStyle = "white";
+
+        ctx.strokeRect(
+            item.x - 8,
+            item.y - 8,
+            16,
+            16
+        );
+    });
+}
+
+/* =========================
+   ZONE DRAW
+========================= */
+
+function drawZone() {
+
+    ctx.save();
+
+    ctx.fillStyle =
+        "rgba(80,110,180,.18)";
+
+    ctx.fillRect(
+        0,
+        0,
+        WORLD.width,
+        WORLD.height
+    );
+
+    ctx.globalCompositeOperation =
+        "destination-out";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        zone.x,
+        zone.y,
+        zone.radius,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+    ctx.globalCompositeOperation =
+        "source-over";
+
+    ctx.strokeStyle =
+        "rgba(100,180,255,.8)";
+
+    ctx.lineWidth = 6;
+
+    ctx.beginPath();
+
+    ctx.arc(
+        zone.x,
+        zone.y,
+        zone.radius,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.stroke();
+
+    ctx.restore();
+}
+
+/* =========================
+   BULLETS DRAW
+========================= */
+
+function drawBullets() {
+
+    bullets.forEach(bullet => {
+
+        ctx.fillStyle =
+            bullet.owner === "player"
+                ? "#fff3a1"
+                : "#ff795f";
+
+        ctx.beginPath();
+
+        ctx.arc(
+            bullet.x,
+            bullet.y,
+            4,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.fill();
+    });
+}
+
+/* =========================
+   HUMAN CHARACTER
+========================= */
+
+function drawHuman(x, y, angle, enemy = false) {
+
+    ctx.save();
+
+    ctx.translate(x, y);
+
+    ctx.rotate(angle);
+
+    /* shadow */
+
+    ctx.fillStyle = "rgba(0,0,0,.35)";
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        0,
+        13,
+        18,
+        8,
+        0,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+    /* legs */
+
+    ctx.strokeStyle =
+        enemy ? "#3d2924" : "#252b2a";
+
+    ctx.lineWidth = 7;
+
+    ctx.lineCap = "round";
+
+    ctx.beginPath();
+
+    ctx.moveTo(-7, 5);
+    ctx.lineTo(-9, 20);
+
+    ctx.moveTo(7, 5);
+    ctx.lineTo(9, 20);
+
+    ctx.stroke();
+
+    /* body */
+
+    ctx.fillStyle =
+        enemy ? "#6d3b32" : "#394943";
+
+    ctx.beginPath();
+
+    ctx.roundRect(
+        -13,
+        -8,
+        26,
+        28,
+        8
+    );
+
+    ctx.fill();
+
+    /* vest */
+
+    ctx.fillStyle =
+        enemy ? "#4c2924" : "#28352f";
+
+    ctx.fillRect(
+        -9,
+        -3,
+        18,
+        16
+    );
+
+    /* arms */
+
+    ctx.strokeStyle =
+        enemy ? "#a36e57" : "#b08b6c";
+
+    ctx.lineWidth = 6;
+
+    ctx.beginPath();
+
+    ctx.moveTo(-10, 0);
+    ctx.lineTo(-18, -8);
+
+    ctx.moveTo(10, 0);
+    ctx.lineTo(18, -8);
+
+    ctx.stroke();
+
+    /* head */
+
+    ctx.fillStyle =
+        enemy ? "#a66f55" : "#c09470";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        0,
+        -17,
+        10,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+    /* hair */
+
+    ctx.fillStyle =
+        enemy ? "#211b18" : "#33261d";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        0,
+        -20,
+        9,
+        Math.PI,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+    /* weapon */
+
+    ctx.strokeStyle = "#171a19";
+
+    ctx.lineWidth = 5;
+
+    ctx.beginPath();
+
+    ctx.moveTo(8, -7);
+    ctx.lineTo(32, -7);
+
+    ctx.stroke();
+
+    ctx.restore();
+}
+
+/* =========================
+   PLAYER DRAW
+========================= */
+
+function drawPlayer() {
+
+    drawHuman(
+        player.x,
+        player.y,
+        player.angle,
+        false
+    );
+}
+
+/* =========================
+   ENEMY DRAW
+========================= */
+
+function drawEnemies() {
+
+    enemies.forEach(enemy => {
+
+        if (!enemy.alive) return;
+
+        drawHuman(
+            enemy.x,
+            enemy.y,
+            enemy.angle,
+            true
+        );
+
+        /* health */
+
+        ctx.fillStyle = "#222";
+
+        ctx.fillRect(
+            enemy.x - 20,
+            enemy.y - 40,
+            40,
+            5
+        );
+
+        ctx.fillStyle = "#d8584e";
+
+        ctx.fillRect(
+            enemy.x - 20,
+            enemy.y - 40,
+            40 * (enemy.health / 100),
+            5
+        );
+    });
+}
+
+/* =========================
+   MINIMAP
+========================= */
+
+function drawMiniMap() {
+
+    const size = miniMap.width;
 
     miniCtx.clearRect(
         0,
@@ -884,7 +1548,7 @@ function drawMinimap(){
         size
     );
 
-    miniCtx.fillStyle="#344832";
+    miniCtx.fillStyle = "#526b43";
 
     miniCtx.fillRect(
         0,
@@ -893,147 +1557,216 @@ function drawMinimap(){
         size
     );
 
-    roads.forEach(r=>{
+    const scale =
+        size / WORLD.width;
 
-        miniCtx.fillStyle="#555650";
+    /* water */
+
+    miniCtx.fillStyle = "#3e7180";
+
+    waterAreas.forEach(water => {
 
         miniCtx.fillRect(
-            r.x*scale,
-            r.y*scale,
-            r.w*scale,
-            r.h*scale
+            water.x * scale,
+            water.y * scale,
+            water.width * scale,
+            water.height * scale
         );
     });
 
-    buildings.forEach(b=>{
+    /* buildings */
 
-        miniCtx.fillStyle="#73756f";
+    miniCtx.fillStyle = "#42453f";
+
+    buildings.forEach(building => {
 
         miniCtx.fillRect(
-            b.x*scale,
-            b.y*scale,
-            b.w*scale,
-            b.h*scale
+            building.x * scale,
+            building.y * scale,
+            building.width * scale,
+            building.height * scale
         );
     });
 
-    miniCtx.strokeStyle="#c9e4ff";
-    miniCtx.lineWidth=2;
+    /* zone */
+
+    miniCtx.strokeStyle = "#8ec8ff";
+
+    miniCtx.lineWidth = 2;
 
     miniCtx.beginPath();
 
     miniCtx.arc(
-        zone.x*scale,
-        zone.y*scale,
-        zone.radius*scale,
+        zone.x * scale,
+        zone.y * scale,
+        zone.radius * scale,
         0,
-        Math.PI*2
+        Math.PI * 2
     );
 
     miniCtx.stroke();
 
-    enemies.forEach(enemy=>{
+    /* enemies */
 
-        miniCtx.fillStyle="#df554d";
+    enemies.forEach(enemy => {
 
-        miniCtx.beginPath();
+        if (!enemy.alive) return;
 
-        miniCtx.arc(
-            enemy.x*scale,
-            enemy.y*scale,
-            2,
-            0,
-            Math.PI*2
+        miniCtx.fillStyle = "#e85c50";
+
+        miniCtx.fillRect(
+            enemy.x * scale - 1.5,
+            enemy.y * scale - 1.5,
+            3,
+            3
         );
-
-        miniCtx.fill();
     });
 
-    miniCtx.fillStyle="#fff";
+    /* player */
+
+    miniCtx.fillStyle = "#ffffff";
 
     miniCtx.beginPath();
 
     miniCtx.arc(
-        player.x*scale,
-        player.y*scale,
+        player.x * scale,
+        player.y * scale,
         4,
         0,
-        Math.PI*2
+        Math.PI * 2
     );
 
     miniCtx.fill();
 }
 
-function updateUI(){
+/* =========================
+   MESSAGE
+========================= */
 
-    healthBar.style.width=
-        Math.max(0,player.health)+"%";
+let messageTimer;
 
-    armorBar.style.width=
-        Math.max(0,player.armor)+"%";
+function showMessage(text) {
 
-    aliveText.textContent=
-        enemies.length+1;
+    message.textContent = text;
+    message.style.opacity = "1";
 
-    if(player.health<=0){
+    clearTimeout(messageTimer);
 
-        gameOver(
-            "DEFEATED",
-            "YOU DID NOT SURVIVE THE VORTEX"
-        );
+    messageTimer = setTimeout(() => {
+
+        message.style.opacity = "0";
+
+    }, 900);
+}
+
+/* =========================
+   DAMAGE
+========================= */
+
+function showDamage() {
+
+    const flash =
+        document.createElement("div");
+
+    flash.className = "damage-flash";
+
+    document.getElementById("hud")
+        .appendChild(flash);
+
+    setTimeout(() => {
+        flash.remove();
+    }, 250);
+}
+
+/* =========================
+   KILL FEED
+========================= */
+
+function addKillFeed(text) {
+
+    const item =
+        document.createElement("div");
+
+    item.className = "kill-message";
+
+    item.textContent = text;
+
+    killFeed.appendChild(item);
+
+    setTimeout(() => {
+        item.remove();
+    }, 3000);
+}
+
+/* =========================
+   GAME OVER
+========================= */
+
+function gameOver() {
+
+    mouse.down = false;
+
+    showMessage("GAME OVER");
+
+    setTimeout(() => {
+
+        location.reload();
+
+    }, 3000);
+}
+
+/* =========================
+   SHOOT LOOP
+========================= */
+
+function handleShooting() {
+
+    if (mouse.down && !reloading) {
+        shoot();
     }
 
-    if(enemies.length===0){
-
-        gameOver(
-            "VICTORY",
-            "YOU ARE THE LAST SURVIVOR"
-        );
+    if (player.fireCooldown > 0) {
+        player.fireCooldown--;
     }
 }
 
-function gameOver(title,text){
+/* =========================
+   GAME LOOP
+========================= */
 
-    if(!gameStarted)return;
+function update() {
 
-    gameStarted=false;
+    updatePlayer();
 
-    document.getElementById("endTitle").textContent=title;
-    document.getElementById("endText").textContent=
-        `${text} • KILLS: ${player.kills}`;
+    updateCamera();
 
-    endScreen.style.display="flex";
+    handleShooting();
+
+    updateBullets();
+
+    updateEnemies();
+
+    updateLoot();
+
+    updateZone();
+
+    updateHUD();
 }
 
-startButton.addEventListener("click",()=>{
-
-    startScreen.style.display="none";
-    gameStarted=true;
-});
-
-function loop(){
-
-    if(gameStarted){
-
-        updatePlayer();
-        updateCamera();
-        updateZone();
-        updateBullets();
-        updateEnemies();
-        updateLoot();
-
-        if(mouse.down){
-            shoot();
-        }
-
-        updateUI();
-    }
+function draw() {
 
     drawWorld();
-    drawMinimap();
 
-    requestAnimationFrame(loop);
+    drawMiniMap();
 }
 
-updateAmmo();
-loop();
+function gameLoop() {
+
+    update();
+
+    draw();
+
+    requestAnimationFrame(gameLoop);
+}
+
+gameLoop();
