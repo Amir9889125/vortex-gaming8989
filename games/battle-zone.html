@@ -6,119 +6,159 @@
 <title>VORTEX Battle Zone</title>
 
 <style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
 }
 
-html, body {
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    background: #111;
-    font-family: Arial, sans-serif;
+html,body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#111;
+    font-family:Arial,sans-serif;
 }
 
-canvas {
-    display: block;
-    width: 100%;
-    height: 100%;
-    cursor: crosshair;
+canvas{
+    display:block;
+    width:100%;
+    height:100%;
 }
 
-#hud {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    color: white;
+#hud{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    color:white;
 }
 
-#top {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    background: rgba(10,10,10,.75);
-    padding: 12px 18px;
-    border: 1px solid rgba(255,255,255,.15);
-    border-radius: 10px;
+#top{
+    position:absolute;
+    top:20px;
+    left:20px;
+    background:rgba(8,8,8,.8);
+    padding:12px 18px;
+    border-radius:10px;
+    border:1px solid rgba(255,255,255,.15);
 }
 
-#health {
-    position: absolute;
-    left: 25px;
-    bottom: 25px;
-    width: 230px;
-    height: 24px;
-    background: #222;
-    border-radius: 6px;
-    overflow: hidden;
-    border: 2px solid #111;
+#status{
+    position:absolute;
+    top:100px;
+    left:20px;
+    background:rgba(8,8,8,.75);
+    padding:10px 15px;
+    border-radius:8px;
 }
 
-#healthBar {
-    width: 100%;
-    height: 100%;
-    background: #29d65b;
-    transition: width .2s;
+#health{
+    position:absolute;
+    bottom:25px;
+    left:25px;
+    width:230px;
+    height:24px;
+    background:#222;
+    border:2px solid #111;
+    border-radius:6px;
+    overflow:hidden;
 }
 
-#healthText {
-    position: absolute;
-    width: 100%;
-    text-align: center;
-    top: 2px;
-    font-weight: bold;
+#healthBar{
+    width:100%;
+    height:100%;
+    background:#29d65b;
 }
 
-#ammo {
-    position: absolute;
-    right: 30px;
-    bottom: 30px;
-    font-size: 28px;
-    font-weight: bold;
-    text-shadow: 0 2px 5px black;
+#healthText{
+    position:absolute;
+    inset:0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-weight:bold;
 }
 
-#reload {
-    position: absolute;
-    right: 30px;
-    bottom: 75px;
-    pointer-events: auto;
-    border: none;
-    padding: 12px 22px;
-    border-radius: 8px;
-    background: #8b2cff;
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
+#ammo{
+    position:absolute;
+    right:30px;
+    bottom:30px;
+    font-size:28px;
+    font-weight:bold;
+    text-shadow:0 2px 6px #000;
 }
 
-#reload:hover {
-    background: #a94cff;
+#reload{
+    position:absolute;
+    right:30px;
+    bottom:75px;
+    pointer-events:auto;
+    border:0;
+    padding:11px 22px;
+    border-radius:8px;
+    background:#8b2cff;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
 }
 
-#minimap {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 190px;
-    height: 190px;
-    background: rgba(10,10,10,.8);
-    border: 3px solid rgba(255,255,255,.25);
-    border-radius: 10px;
+#reload:hover{
+    background:#a94cff;
 }
 
-#message {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%,-50%);
-    font-size: 32px;
-    font-weight: bold;
-    text-shadow: 0 3px 10px black;
-    opacity: 0;
-    transition: .3s;
+#minimap{
+    position:absolute;
+    right:20px;
+    top:20px;
+    width:190px;
+    height:190px;
+    background:#30382d;
+    border:3px solid rgba(255,255,255,.25);
+    border-radius:10px;
+}
+
+#jump{
+    position:absolute;
+    left:50%;
+    bottom:45px;
+    transform:translateX(-50%);
+    padding:15px 35px;
+    border:0;
+    border-radius:10px;
+    background:#ff9d21;
+    color:#111;
+    font-size:18px;
+    font-weight:bold;
+    cursor:pointer;
+    pointer-events:auto;
+}
+
+#jump:hover{
+    background:#ffb44f;
+}
+
+#parachute{
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    color:white;
+    font-size:22px;
+    font-weight:bold;
+    text-align:center;
+    text-shadow:0 3px 10px #000;
+}
+
+#message{
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    color:white;
+    font-size:35px;
+    font-weight:bold;
+    text-shadow:0 3px 15px #000;
+    text-align:center;
 }
 </style>
 </head>
@@ -130,12 +170,20 @@ canvas {
 <div id="hud">
 
     <div id="top">
-        VORTEX BATTLE ZONE
+        <b>VORTEX BATTLE ZONE</b>
         <br>
         <small>WASD = Move | Mouse = Aim | Click = Shoot</small>
     </div>
 
+    <div id="status">
+        وضعیت: <b id="stateText">هواپیما</b>
+    </div>
+
     <canvas id="minimap" width="190" height="190"></canvas>
+
+    <button id="jump">SPACE — پرش</button>
+
+    <div id="parachute"></div>
 
     <div id="health">
         <div id="healthBar"></div>
@@ -151,470 +199,539 @@ canvas {
 </div>
 
 <script>
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
 
-const minimap = document.getElementById("minimap");
-const mini = minimap.getContext("2d");
+/* =====================================================
+   CANVAS
+===================================================== */
 
-const healthBar = document.getElementById("healthBar");
-const healthText = document.getElementById("healthText");
-const ammoText = document.getElementById("ammo");
-const reloadButton = document.getElementById("reload");
-const message = document.getElementById("message");
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
 
-function resize() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+const minimap=document.getElementById("minimap");
+const mini=minimap.getContext("2d");
+
+function resize(){
+    canvas.width=window.innerWidth;
+    canvas.height=window.innerHeight;
 }
 
-window.addEventListener("resize", resize);
+window.addEventListener("resize",resize);
 resize();
 
-/* =========================
+
+/* =====================================================
    WORLD
-========================= */
+===================================================== */
 
-const WORLD_WIDTH = 5000;
-const WORLD_HEIGHT = 5000;
+const WORLD_WIDTH=5000;
+const WORLD_HEIGHT=5000;
 
-const keys = {};
 
-let mouseX = canvas.width / 2;
-let mouseY = canvas.height / 2;
-let mouseDown = false;
+/* =====================================================
+   GAME STATE
+===================================================== */
 
-document.addEventListener("keydown", e => {
-    keys[e.key.toLowerCase()] = true;
+let gameState="plane";
 
-    if (e.key.toLowerCase() === "r") {
+/*
+plane
+falling
+parachute
+landed
+*/
+
+
+/* =====================================================
+   PLAYER
+===================================================== */
+
+const player={
+    x:2500,
+    y:2500,
+
+    speed:4,
+
+    angle:0,
+
+    hp:100,
+
+    ammo:30,
+    reserve:120,
+
+    altitude:1200,
+
+    vx:0,
+    vy:0,
+
+    parachute:false
+};
+
+
+/* =====================================================
+   CAMERA
+===================================================== */
+
+const camera={
+    x:0,
+    y:0
+};
+
+
+/* =====================================================
+   CONTROLS
+===================================================== */
+
+const keys={};
+
+let mouseX=canvas.width/2;
+let mouseY=canvas.height/2;
+
+let mouseDown=false;
+
+document.addEventListener("keydown",e=>{
+
+    keys[e.key.toLowerCase()]=true;
+
+    if(e.code==="Space"){
+        jump();
+    }
+
+    if(e.key.toLowerCase()==="r"){
         reload();
     }
 });
 
-document.addEventListener("keyup", e => {
-    keys[e.key.toLowerCase()] = false;
+document.addEventListener("keyup",e=>{
+    keys[e.key.toLowerCase()]=false;
 });
 
-canvas.addEventListener("mousemove", e => {
-    mouseX = e.clientX;
-    mouseY = e.clientY;
+canvas.addEventListener("mousemove",e=>{
+
+    mouseX=e.clientX;
+    mouseY=e.clientY;
+
 });
 
-canvas.addEventListener("mousedown", () => {
-    mouseDown = true;
+canvas.addEventListener("mousedown",()=>{
+    mouseDown=true;
 });
 
-document.addEventListener("mouseup", () => {
-    mouseDown = false;
+document.addEventListener("mouseup",()=>{
+    mouseDown=false;
 });
 
-/* =========================
-   PLAYER
-========================= */
 
-const player = {
-    x: WORLD_WIDTH / 2,
-    y: WORLD_HEIGHT / 2,
-    speed: 4,
-    angle: 0,
-    hp: 100,
-    ammo: 30,
-    reserve: 120
-};
+/* =====================================================
+   JUMP BUTTON
+===================================================== */
 
-/* =========================
-   CAMERA
-========================= */
+document.getElementById("jump").addEventListener("click",jump);
 
-const camera = {
-    x: 0,
-    y: 0
-};
 
-/* =========================
-   MAP OBJECTS
-========================= */
+/* =====================================================
+   MAP
+===================================================== */
 
-const buildings = [];
-const trees = [];
-const rocks = [];
-const crates = [];
-const roads = [];
+const buildings=[];
+const trees=[];
+const rocks=[];
+const crates=[];
 
-function random(min,max) {
-    return Math.random() * (max-min) + min;
+function random(min,max){
+    return Math.random()*(max-min)+min;
 }
+
 
 /* Roads */
 
-roads.push({
-    x: 0,
-    y: 2350,
-    w: WORLD_WIDTH,
-    h: 300
-});
+const roads=[
+    {
+        x:0,
+        y:2350,
+        w:WORLD_WIDTH,
+        h:300
+    },
+    {
+        x:2350,
+        y:0,
+        w:300,
+        h:WORLD_HEIGHT
+    }
+];
 
-roads.push({
-    x: 2350,
-    y: 0,
-    w: 300,
-    h: WORLD_HEIGHT
-});
 
 /* Buildings */
 
-for(let i=0;i<45;i++) {
+for(let i=0;i<55;i++){
 
-    let w = random(100,260);
-    let h = random(100,220);
+    const w=random(100,250);
+    const h=random(100,220);
 
-    let x = random(150,WORLD_WIDTH-w-150);
-    let y = random(150,WORLD_HEIGHT-h-150);
-
-    if (
-        x < 2650 &&
-        x+w > 2350 &&
-        y < 2650 &&
-        y+h > 2350
-    ) continue;
+    const x=random(100,WORLD_WIDTH-w-100);
+    const y=random(100,WORLD_HEIGHT-h-100);
 
     buildings.push({
         x,
         y,
         w,
-        h,
-        roof: Math.random() > .5
+        h
     });
+
 }
+
 
 /* Trees */
 
-for(let i=0;i<500;i++) {
+for(let i=0;i<600;i++){
 
     trees.push({
-        x: random(50,WORLD_WIDTH-50),
-        y: random(50,WORLD_HEIGHT-50),
-        size: random(12,28)
+        x:random(50,WORLD_WIDTH-50),
+        y:random(50,WORLD_HEIGHT-50),
+        size:random(12,28)
     });
+
 }
+
 
 /* Rocks */
 
-for(let i=0;i<180;i++) {
+for(let i=0;i<200;i++){
 
     rocks.push({
-        x: random(50,WORLD_WIDTH-50),
-        y: random(50,WORLD_HEIGHT-50),
-        size: random(8,25)
+        x:random(50,WORLD_WIDTH-50),
+        y:random(50,WORLD_HEIGHT-50),
+        size:random(8,25)
     });
+
 }
+
 
 /* Crates */
 
-for(let i=0;i<120;i++) {
+for(let i=0;i<150;i++){
 
     crates.push({
-        x: random(100,WORLD_WIDTH-100),
-        y: random(100,WORLD_HEIGHT-100)
+        x:random(100,WORLD_WIDTH-100),
+        y:random(100,WORLD_HEIGHT-100)
     });
+
 }
 
-/* =========================
-   ENEMIES
-========================= */
 
-const enemies = [];
+/* =====================================================
+   AIRPLANE
+===================================================== */
 
-for(let i=0;i<20;i++) {
+const plane={
+    x:-800,
+    y:1300,
 
-    enemies.push({
-        x: random(300,WORLD_WIDTH-300),
-        y: random(300,WORLD_HEIGHT-300),
-        angle: random(0,Math.PI*2),
-        hp: 100
-    });
-}
+    speed:8,
 
-/* =========================
-   BULLETS
-========================= */
+    active:true
+};
 
-const bullets = [];
 
-/* =========================
-   RELOAD
-========================= */
+/* =====================================================
+   JUMP
+===================================================== */
 
-let reloading = false;
+function jump(){
 
-function reload() {
-
-    if(reloading) return;
-
-    if(player.ammo >= 30) return;
-
-    if(player.reserve <= 0) return;
-
-    reloading = true;
-
-    message.textContent = "RELOADING...";
-    message.style.opacity = 1;
-
-    setTimeout(() => {
-
-        let needed = 30 - player.ammo;
-        let amount = Math.min(needed,player.reserve);
-
-        player.ammo += amount;
-        player.reserve -= amount;
-
-        reloading = false;
-
-        message.style.opacity = 0;
-
-    },1000);
-}
-
-reloadButton.addEventListener("click",reload);
-
-/* =========================
-   SHOOT
-========================= */
-
-let lastShot = 0;
-
-function shoot() {
-
-    if(reloading) return;
-
-    if(player.ammo <= 0) {
-        reload();
+    if(gameState!=="plane"){
         return;
     }
 
-    const now = Date.now();
+    gameState="falling";
 
-    if(now-lastShot < 120) return;
+    player.x=plane.x;
+    player.y=plane.y;
 
-    lastShot = now;
+    player.altitude=1200;
 
-    player.ammo--;
+    player.vx=0;
+    player.vy=1;
 
-    bullets.push({
-        x: player.x,
-        y: player.y,
-        angle: player.angle,
-        speed: 15,
-        life: 80
-    });
+    document.getElementById("jump").style.display="none";
+
+    document.getElementById("stateText").textContent="در حال سقوط";
+
 }
 
-/* =========================
-   DRAW WORLD
-========================= */
 
-function drawWorld() {
+/* =====================================================
+   PARACHUTE
+===================================================== */
 
-    ctx.fillStyle = "#68735c";
-    ctx.fillRect(0,0,WORLD_WIDTH,WORLD_HEIGHT);
+function openParachute(){
 
-    /* grass details */
+    if(gameState!=="falling"){
+        return;
+    }
 
-    ctx.fillStyle = "rgba(40,70,40,.35)";
+    if(player.altitude>500){
+        return;
+    }
 
-    for(let x=0;x<WORLD_WIDTH;x+=100) {
+    player.parachute=true;
 
-        for(let y=0;y<WORLD_HEIGHT;y+=100) {
+    gameState="parachute";
 
-            ctx.fillRect(x,y,2,2);
+    document.getElementById("stateText").textContent="چتر باز است";
+
+}
+
+
+/* =====================================================
+   LAND
+===================================================== */
+
+function land(){
+
+    gameState="landed";
+
+    player.altitude=0;
+
+    player.parachute=false;
+
+    document.getElementById("stateText").textContent="روی زمین";
+
+}
+
+
+/* =====================================================
+   FALLING
+===================================================== */
+
+function updateAirDrop(){
+
+    if(gameState==="falling"){
+
+        player.altitude-=10;
+
+        player.x+=player.vx;
+        player.y+=player.vy;
+
+        player.vy+=0.15;
+
+        /*
+        باز کردن خودکار چتر
+        */
+
+        if(player.altitude<=500){
+
+            openParachute();
 
         }
+
     }
 
-    /* roads */
 
-    ctx.fillStyle = "#30343a";
+    if(gameState==="parachute"){
 
-    for(const road of roads) {
-        ctx.fillRect(
-            road.x-camera.x,
-            road.y-camera.y,
-            road.w,
-            road.h
-        );
+        player.altitude-=3;
+
+        /*
+        کنترل حرکت در هوا
+        */
+
+        if(keys["w"]){
+            player.y-=3;
+        }
+
+        if(keys["s"]){
+            player.y+=3;
+        }
+
+        if(keys["a"]){
+            player.x-=3;
+        }
+
+        if(keys["d"]){
+            player.x+=3;
+        }
+
+        if(player.altitude<=0){
+
+            land();
+
+        }
+
     }
 
-    /* road lines */
 
-    ctx.strokeStyle = "#d1bd50";
-    ctx.lineWidth = 5;
-    ctx.setLineDash([40,35]);
+    player.x=Math.max(
+        50,
+        Math.min(WORLD_WIDTH-50,player.x)
+    );
+
+    player.y=Math.max(
+        50,
+        Math.min(WORLD_HEIGHT-50,player.y)
+    );
+
+}
+
+
+/* =====================================================
+   AIRPLANE UPDATE
+===================================================== */
+
+function updatePlane(){
+
+    if(gameState!=="plane"){
+        return;
+    }
+
+    plane.x+=plane.speed;
+
+    /*
+    هواپیما از مپ عبور می‌کند
+    */
+
+    if(plane.x>WORLD_WIDTH+800){
+
+        plane.x=-800;
+
+    }
+
+}
+
+
+/* =====================================================
+   DRAW AIRPLANE
+===================================================== */
+
+function drawPlane(){
+
+    if(gameState!=="plane"){
+        return;
+    }
+
+    const x=plane.x-camera.x;
+    const y=plane.y-camera.y;
+
+    ctx.save();
+
+    ctx.translate(x,y);
+
+    /*
+    بدنه
+    */
+
+    ctx.fillStyle="#e5e5e5";
+
+    ctx.fillRect(
+        -80,
+        -18,
+        160,
+        36
+    );
+
+    /*
+    دم
+    */
+
+    ctx.fillStyle="#bfc4ca";
 
     ctx.beginPath();
 
-    ctx.moveTo(
-        0-camera.x,
-        2500-camera.y
+    ctx.moveTo(-80,-18);
+    ctx.lineTo(-105,-50);
+    ctx.lineTo(-70,-15);
+    ctx.fill();
+
+    /*
+    بال
+    */
+
+    ctx.fillStyle="#c7ccd1";
+
+    ctx.fillRect(
+        -25,
+        -75,
+        50,
+        150
     );
 
-    ctx.lineTo(
-        WORLD_WIDTH-camera.x,
-        2500-camera.y
+    /*
+    کابین
+    */
+
+    ctx.fillStyle="#273d52";
+
+    ctx.fillRect(
+        45,
+        -13,
+        25,
+        26
     );
 
-    ctx.stroke();
+    ctx.restore();
+
+}
+
+
+/* =====================================================
+   DRAW PARACHUTE
+===================================================== */
+
+function drawParachute(){
+
+    if(gameState!=="parachute"){
+        return;
+    }
+
+    const x=player.x-camera.x;
+    const y=player.y-camera.y;
+
+    ctx.save();
+
+    /*
+    چتر
+    */
+
+    ctx.fillStyle="#e63e55";
 
     ctx.beginPath();
 
-    ctx.moveTo(
-        2500-camera.x,
-        0-camera.y
+    ctx.arc(
+        x,
+        y-100,
+        65,
+        Math.PI,
+        0
     );
 
-    ctx.lineTo(
-        2500-camera.x,
-        WORLD_HEIGHT-camera.y
-    );
+    ctx.fill();
+
+    /*
+    نخ‌ها
+    */
+
+    ctx.strokeStyle="white";
+    ctx.lineWidth=2;
+
+    ctx.beginPath();
+
+    ctx.moveTo(x-60,y-100);
+    ctx.lineTo(x-10,y);
+
+    ctx.moveTo(x+60,y-100);
+    ctx.lineTo(x+10,y);
 
     ctx.stroke();
 
-    ctx.setLineDash([]);
+    ctx.restore();
 
-    /* buildings */
-
-    for(const b of buildings) {
-
-        ctx.fillStyle = "#252a2d";
-
-        ctx.fillRect(
-            b.x-camera.x,
-            b.y-camera.y,
-            b.w,
-            b.h
-        );
-
-        ctx.fillStyle = "#17191b";
-
-        ctx.fillRect(
-            b.x-camera.x+8,
-            b.y-camera.y+8,
-            b.w-16,
-            b.h-16
-        );
-
-        /* windows */
-
-        ctx.fillStyle = "#a9b6b8";
-
-        for(let wx=b.x+25; wx<b.x+b.w-20; wx+=40) {
-
-            for(let wy=b.y+25; wy<b.y+b.h-20; wy+=40) {
-
-                ctx.fillRect(
-                    wx-camera.x,
-                    wy-camera.y,
-                    12,
-                    12
-                );
-
-            }
-        }
-    }
-
-    /* trees */
-
-    for(const tree of trees) {
-
-        let x=tree.x-camera.x;
-        let y=tree.y-camera.y;
-
-        ctx.fillStyle="#533923";
-
-        ctx.fillRect(
-            x-4,
-            y,
-            8,
-            tree.size
-        );
-
-        ctx.fillStyle="#244d2d";
-
-        ctx.beginPath();
-
-        ctx.arc(
-            x,
-            y,
-            tree.size,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-
-        ctx.fillStyle="#32683b";
-
-        ctx.beginPath();
-
-        ctx.arc(
-            x-7,
-            y-6,
-            tree.size*.55,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-    }
-
-    /* rocks */
-
-    for(const rock of rocks) {
-
-        ctx.fillStyle="#55585b";
-
-        ctx.beginPath();
-
-        ctx.arc(
-            rock.x-camera.x,
-            rock.y-camera.y,
-            rock.size,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-    }
-
-    /* crates */
-
-    for(const crate of crates) {
-
-        ctx.fillStyle="#9b6b35";
-
-        ctx.fillRect(
-            crate.x-camera.x,
-            crate.y-camera.y,
-            28,
-            28
-        );
-
-        ctx.strokeStyle="#4c321a";
-
-        ctx.strokeRect(
-            crate.x-camera.x,
-            crate.y-camera.y,
-            28,
-            28
-        );
-    }
 }
 
-/* =========================
-   DRAW HUMAN PLAYER
-========================= */
 
-function drawHuman(x,y,angle,color="#3f8cff") {
+/* =====================================================
+   HUMAN PLAYER
+===================================================== */
+
+function drawHuman(x,y,angle,color="#358cff"){
 
     ctx.save();
 
@@ -622,7 +739,9 @@ function drawHuman(x,y,angle,color="#3f8cff") {
 
     ctx.rotate(angle);
 
-    /* shadow */
+    /*
+    Shadow
+    */
 
     ctx.fillStyle="rgba(0,0,0,.35)";
 
@@ -640,14 +759,20 @@ function drawHuman(x,y,angle,color="#3f8cff") {
 
     ctx.fill();
 
-    /* legs */
+
+    /*
+    Legs
+    */
 
     ctx.fillStyle="#20242c";
 
     ctx.fillRect(-10,5,7,18);
     ctx.fillRect(3,5,7,18);
 
-    /* body */
+
+    /*
+    Body
+    */
 
     ctx.fillStyle=color;
 
@@ -658,14 +783,20 @@ function drawHuman(x,y,angle,color="#3f8cff") {
         25
     );
 
-    /* arms */
+
+    /*
+    Arms
+    */
 
     ctx.fillStyle="#d2a17b";
 
     ctx.fillRect(-19,-7,7,18);
     ctx.fillRect(12,-7,7,18);
 
-    /* head */
+
+    /*
+    Head
+    */
 
     ctx.beginPath();
 
@@ -679,7 +810,10 @@ function drawHuman(x,y,angle,color="#3f8cff") {
 
     ctx.fill();
 
-    /* hair */
+
+    /*
+    Hair
+    */
 
     ctx.fillStyle="#202020";
 
@@ -695,7 +829,10 @@ function drawHuman(x,y,angle,color="#3f8cff") {
 
     ctx.fill();
 
-    /* gun */
+
+    /*
+    Gun
+    */
 
     ctx.fillStyle="#171717";
 
@@ -707,318 +844,153 @@ function drawHuman(x,y,angle,color="#3f8cff") {
     );
 
     ctx.restore();
+
 }
 
-/* =========================
-   PLAYER
-========================= */
 
-function drawPlayer() {
+/* =====================================================
+   DRAW PLAYER
+===================================================== */
+
+function drawPlayer(){
+
+    if(gameState==="plane"){
+        return;
+    }
 
     drawHuman(
         player.x-camera.x,
         player.y-camera.y,
         player.angle,
-        "#368cff"
+        "#358cff"
     );
+
 }
 
-/* =========================
-   ENEMIES
-========================= */
 
-function drawEnemies() {
+/* =====================================================
+   DRAW WORLD
+===================================================== */
 
-    for(const enemy of enemies) {
+function drawWorld(){
 
-        if(enemy.hp <= 0) continue;
+    ctx.fillStyle="#657259";
 
-        drawHuman(
-            enemy.x-camera.x,
-            enemy.y-camera.y,
-            enemy.angle,
-            "#d63c48"
-        );
-    }
-}
-
-/* =========================
-   BULLETS
-========================= */
-
-function drawBullets() {
-
-    ctx.fillStyle="#ffe66d";
-
-    for(const bullet of bullets) {
-
-        ctx.beginPath();
-
-        ctx.arc(
-            bullet.x-camera.x,
-            bullet.y-camera.y,
-            4,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-    }
-}
-
-/* =========================
-   MINIMAP
-========================= */
-
-function drawMinimap() {
-
-    mini.clearRect(
+    ctx.fillRect(
         0,
         0,
-        minimap.width,
-        minimap.height
+        WORLD_WIDTH,
+        WORLD_HEIGHT
     );
 
-    mini.fillStyle="#536047";
 
-    mini.fillRect(
-        0,
-        0,
-        190,
-        190
-    );
+    /*
+    Grass details
+    */
 
-    /* roads */
+    ctx.fillStyle="rgba(30,60,30,.35)";
 
-    mini.fillStyle="#30343a";
+    for(let x=0;x<WORLD_WIDTH;x+=100){
 
-    mini.fillRect(
-        0,
-        89,
-        190,
-        12
-    );
+        for(let y=0;y<WORLD_HEIGHT;y+=100){
 
-    mini.fillRect(
-        89,
-        0,
-        12,
-        190
-    );
-
-    /* buildings */
-
-    mini.fillStyle="#222";
-
-    for(const b of buildings) {
-
-        mini.fillRect(
-            b.x/WORLD_WIDTH*190,
-            b.y/WORLD_HEIGHT*190,
-            b.w/WORLD_WIDTH*190,
-            b.h/WORLD_HEIGHT*190
-        );
-    }
-
-    /* enemies */
-
-    mini.fillStyle="#ff4040";
-
-    for(const enemy of enemies) {
-
-        if(enemy.hp <= 0) continue;
-
-        mini.fillRect(
-            enemy.x/WORLD_WIDTH*190-2,
-            enemy.y/WORLD_HEIGHT*190-2,
-            4,
-            4
-        );
-    }
-
-    /* player */
-
-    mini.fillStyle="#39a0ff";
-
-    mini.beginPath();
-
-    mini.arc(
-        player.x/WORLD_WIDTH*190,
-        player.y/WORLD_HEIGHT*190,
-        5,
-        0,
-        Math.PI*2
-    );
-
-    mini.fill();
-}
-
-/* =========================
-   UPDATE PLAYER
-========================= */
-
-function updatePlayer() {
-
-    let dx=0;
-    let dy=0;
-
-    if(keys["w"]) dy--;
-    if(keys["s"]) dy++;
-    if(keys["a"]) dx--;
-    if(keys["d"]) dx++;
-
-    if(dx !== 0 || dy !== 0) {
-
-        const length=Math.hypot(dx,dy);
-
-        dx/=length;
-        dy/=length;
-
-        player.x += dx*player.speed;
-        player.y += dy*player.speed;
-    }
-
-    player.x=Math.max(30,Math.min(WORLD_WIDTH-30,player.x));
-    player.y=Math.max(30,Math.min(WORLD_HEIGHT-30,player.y));
-
-    camera.x=player.x-canvas.width/2;
-    camera.y=player.y-canvas.height/2;
-
-    camera.x=Math.max(0,Math.min(
-        WORLD_WIDTH-canvas.width,
-        camera.x
-    ));
-
-    camera.y=Math.max(0,Math.min(
-        WORLD_HEIGHT-canvas.height,
-        camera.y
-    ));
-
-    player.angle=Math.atan2(
-        mouseY-canvas.height/2,
-        mouseX-canvas.width/2
-    );
-
-    if(mouseDown) shoot();
-}
-
-/* =========================
-   UPDATE BULLETS
-========================= */
-
-function updateBullets() {
-
-    for(let i=bullets.length-1;i>=0;i--) {
-
-        const bullet=bullets[i];
-
-        bullet.x+=Math.cos(bullet.angle)*bullet.speed;
-        bullet.y+=Math.sin(bullet.angle)*bullet.speed;
-
-        bullet.life--;
-
-        for(const enemy of enemies) {
-
-            if(enemy.hp<=0) continue;
-
-            const distance=Math.hypot(
-                bullet.x-enemy.x,
-                bullet.y-enemy.y
+            ctx.fillRect(
+                x-camera.x,
+                y-camera.y,
+                2,
+                2
             );
 
-            if(distance<22) {
-
-                enemy.hp-=50;
-                bullet.life=0;
-
-                break;
-            }
         }
 
-        if(bullet.life<=0) {
-            bullets.splice(i,1);
-        }
     }
-}
 
-/* =========================
-   UPDATE ENEMIES
-========================= */
 
-function updateEnemies() {
+    /*
+    Roads
+    */
 
-    for(const enemy of enemies) {
+    ctx.fillStyle="#30343a";
 
-        if(enemy.hp<=0) continue;
+    for(const road of roads){
 
-        const dx=player.x-enemy.x;
-        const dy=player.y-enemy.y;
+        ctx.fillRect(
+            road.x-camera.x,
+            road.y-camera.y,
+            road.w,
+            road.h
+        );
 
-        const distance=Math.hypot(dx,dy);
-
-        enemy.angle=Math.atan2(dy,dx);
-
-        if(distance>250) {
-
-            enemy.x+=Math.cos(enemy.angle)*1;
-            enemy.y+=Math.sin(enemy.angle)*1;
-
-        } else if(distance<250 && Math.random()<0.01) {
-
-            player.hp-=2;
-
-            if(player.hp<0) player.hp=0;
-        }
     }
-}
 
-/* =========================
-   HUD
-========================= */
 
-function updateHUD() {
+    /*
+    Road lines
+    */
 
-    healthBar.style.width=player.hp+"%";
-    healthText.textContent=Math.ceil(player.hp)+" HP";
+    ctx.strokeStyle="#d5bd4d";
+    ctx.lineWidth=5;
+    ctx.setLineDash([40,35]);
 
-    ammoText.textContent=
-        player.ammo+" / "+player.reserve;
-}
+    ctx.beginPath();
 
-/* =========================
-   GAME LOOP
-========================= */
-
-function gameLoop() {
-
-    updatePlayer();
-    updateBullets();
-    updateEnemies();
-
-    ctx.clearRect(
-        0,
-        0,
-        canvas.width,
-        canvas.height
+    ctx.moveTo(
+        0-camera.x,
+        2500-camera.y
     );
 
-    ctx.save();
+    ctx.lineTo(
+        WORLD_WIDTH-camera.x,
+        2500-camera.y
+    );
 
-    drawWorld();
-    drawBullets();
-    drawEnemies();
-    drawPlayer();
+    ctx.stroke();
 
-    ctx.restore();
 
-    drawMinimap();
-    updateHUD();
+    ctx.beginPath();
 
-    requestAnimationFrame(gameLoop);
-}
+    ctx.moveTo(
+        2500-camera.x,
+        0-camera.y
+    );
 
-gameLoop();
-</script>
+    ctx.lineTo(
+        2500-camera.x,
+        WORLD_HEIGHT-camera.y
+    );
 
-</body>
-</html>
+    ctx.stroke();
+
+    ctx.setLineDash([]);
+
+
+    /*
+    Buildings
+    */
+
+    for(const b of buildings){
+
+        ctx.fillStyle="#292d30";
+
+        ctx.fillRect(
+            b.x-camera.x,
+            b.y-camera.y,
+            b.w,
+            b.h
+        );
+
+        ctx.fillStyle="#17191b";
+
+        ctx.fillRect(
+            b.x-camera.x+8,
+            b.y-camera.y+8,
+            b.w-16,
+            b.h-16
+        );
+
+
+        /*
+        Windows
+        */
+
+        ctx.fillStyle="#9ca
