@@ -2,295 +2,158 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>VORTEX Battle Zone</title>
 
 <style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-}
+*{margin:0;padding:0;box-sizing:border-box}
 
 html,body{
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    background:#111;
-    font-family:Arial,sans-serif;
+width:100%;
+height:100%;
+overflow:hidden;
+background:#101510;
+font-family:Arial,sans-serif
 }
 
-canvas{
-    display:block;
-    width:100%;
-    height:100%;
-    cursor:crosshair;
+#game{
+display:block;
+width:100%;
+height:100%;
+cursor:crosshair
 }
 
 #hud{
-    position:fixed;
-    inset:0;
-    pointer-events:none;
-    color:white;
+position:fixed;
+inset:0;
+pointer-events:none;
+color:white
 }
 
 #top{
-    position:absolute;
-    top:20px;
-    left:20px;
-    background:rgba(8,10,10,.78);
-    padding:12px 18px;
-    border:1px solid rgba(255,255,255,.15);
-    border-radius:10px;
-    line-height:1.7;
-    backdrop-filter:blur(8px);
-}
-
-#health{
-    position:absolute;
-    left:25px;
-    bottom:25px;
-    width:230px;
-    height:24px;
-    background:#222;
-    border-radius:6px;
-    overflow:hidden;
-    border:2px solid #111;
-}
-
-#healthBar{
-    width:100%;
-    height:100%;
-    background:#29d65b;
-    transition:width .2s;
-}
-
-#healthText{
-    position:absolute;
-    width:100%;
-    text-align:center;
-    top:2px;
-    font-weight:bold;
-}
-
-#ammo{
-    position:absolute;
-    right:30px;
-    bottom:30px;
-    font-size:28px;
-    font-weight:bold;
-    text-shadow:0 2px 5px black;
-}
-
-#reload{
-    position:absolute;
-    right:30px;
-    bottom:75px;
-    pointer-events:auto;
-    border:none;
-    padding:12px 22px;
-    border-radius:8px;
-    background:#8b2cff;
-    color:white;
-    font-weight:bold;
-    cursor:pointer;
-}
-
-#reload:hover{
-    background:#a94cff;
+position:absolute;
+top:18px;
+left:18px;
+padding:12px 16px;
+background:rgba(8,12,10,.82);
+border:1px solid rgba(255,255,255,.15);
+border-radius:10px;
+line-height:1.6
 }
 
 #minimap{
-    position:absolute;
-    top:20px;
-    right:20px;
-    width:210px;
-    height:210px;
-    background:rgba(10,10,10,.85);
-    border:3px solid rgba(255,255,255,.3);
-    border-radius:12px;
+position:absolute;
+top:18px;
+right:18px;
+width:190px;
+height:190px;
+border:3px solid rgba(255,255,255,.35);
+border-radius:10px;
+background:#46543c
+}
+
+#health{
+position:absolute;
+left:25px;
+bottom:25px;
+width:240px;
+height:25px;
+background:#222;
+border:2px solid #111;
+border-radius:7px;
+overflow:hidden
+}
+
+#healthBar{
+height:100%;
+width:100%;
+background:#29d65b
+}
+
+#healthText{
+position:absolute;
+inset:0;
+text-align:center;
+line-height:21px;
+font-weight:bold
+}
+
+#ammo{
+position:absolute;
+right:30px;
+bottom:30px;
+font-size:28px;
+font-weight:bold;
+text-shadow:0 2px 5px #000
+}
+
+#reload{
+position:absolute;
+right:30px;
+bottom:78px;
+pointer-events:auto;
+padding:11px 20px;
+border:0;
+border-radius:8px;
+background:#2878ff;
+color:#fff;
+font-weight:bold;
+cursor:pointer
 }
 
 #message{
-    position:absolute;
-    top:50%;
-    left:50%;
-    transform:translate(-50%,-50%);
-    font-size:32px;
-    font-weight:bold;
-    text-shadow:0 3px 10px black;
-    opacity:0;
-    transition:.3s;
-    text-align:center;
-    white-space:nowrap;
-}
-
-#phase{
-    position:absolute;
-    top:20px;
-    left:50%;
-    transform:translateX(-50%);
-    padding:10px 18px;
-    border-radius:20px;
-    background:rgba(5,5,5,.75);
-    border:1px solid rgba(255,255,255,.2);
-    font-weight:bold;
-}
-
-#dropInfo{
-    position:absolute;
-    bottom:35px;
-    left:50%;
-    transform:translateX(-50%);
-    text-align:center;
-    font-weight:bold;
-    font-size:16px;
-    text-shadow:0 2px 6px black;
-}
-
-#crosshair{
-    position:absolute;
-    left:50%;
-    top:50%;
-    width:20px;
-    height:20px;
-    transform:translate(-50%,-50%);
-}
-
-#crosshair:before,
-#crosshair:after{
-    content:"";
-    position:absolute;
-    background:white;
-    box-shadow:0 0 4px black;
-}
-
-#crosshair:before{
-    width:2px;
-    height:20px;
-    left:9px;
-}
-
-#crosshair:after{
-    height:2px;
-    width:20px;
-    top:9px;
+position:absolute;
+left:50%;
+top:50%;
+transform:translate(-50%,-50%);
+font-size:34px;
+font-weight:bold;
+text-shadow:0 3px 12px #000;
+opacity:0;
+text-align:center
 }
 
 #startScreen{
-    position:fixed;
-    inset:0;
-    z-index:1000;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:
-        radial-gradient(circle at center,rgba(90,30,160,.22),transparent 45%),
-        rgba(3,4,6,.96);
-    color:white;
+position:fixed;
+inset:0;
+z-index:20;
+background:
+linear-gradient(rgba(5,10,7,.72),rgba(5,10,7,.9)),
+radial-gradient(circle at center,#315b35,#071008);
+display:flex;
+align-items:center;
+justify-content:center;
+color:white
 }
 
 .startBox{
-    width:min(600px,90%);
-    text-align:center;
-    padding:50px 35px;
-    border:1px solid rgba(139,44,255,.5);
-    border-radius:20px;
-    background:rgba(10,10,16,.9);
-    box-shadow:0 0 70px rgba(139,44,255,.15);
+text-align:center;
+background:rgba(10,16,12,.92);
+padding:45px;
+border:1px solid rgba(255,255,255,.2);
+border-radius:18px;
+box-shadow:0 20px 80px #000
 }
 
 .startBox h1{
-    font-size:48px;
-    letter-spacing:4px;
-    margin-bottom:10px;
-}
-
-.startBox h1 span{
-    color:#b56cff;
+font-size:42px;
+margin-bottom:10px
 }
 
 .startBox p{
-    color:#aaa;
-    margin:15px 0 30px;
-    line-height:1.8;
+color:#aaa;
+margin-bottom:25px
 }
 
 #startButton{
-    border:0;
-    padding:15px 35px;
-    border-radius:10px;
-    background:linear-gradient(135deg,#a139ff,#6414d8);
-    color:white;
-    font-size:16px;
-    font-weight:bold;
-    cursor:pointer;
-    box-shadow:0 0 30px rgba(139,44,255,.3);
-}
-
-#startButton:hover{
-    transform:translateY(-2px);
-}
-
-#deathScreen{
-    position:fixed;
-    inset:0;
-    z-index:900;
-    display:none;
-    align-items:center;
-    justify-content:center;
-    background:rgba(0,0,0,.82);
-}
-
-.deathBox{
-    text-align:center;
-    color:white;
-}
-
-.deathBox h1{
-    font-size:55px;
-    color:#ff4545;
-    margin-bottom:15px;
-}
-
-#restartButton{
-    padding:13px 30px;
-    border:0;
-    border-radius:8px;
-    background:#8b2cff;
-    color:white;
-    cursor:pointer;
-    font-weight:bold;
-}
-
-#zoneWarning{
-    position:absolute;
-    top:80px;
-    left:50%;
-    transform:translateX(-50%);
-    color:#ff5555;
-    font-weight:bold;
-    opacity:0;
-    text-shadow:0 2px 5px black;
-}
-
-@media(max-width:700px){
-    #minimap{
-        width:150px;
-        height:150px;
-    }
-
-    #top{
-        font-size:11px;
-    }
-
-    #ammo{
-        font-size:22px;
-    }
-
-    #health{
-        width:180px;
-    }
+padding:14px 35px;
+border:0;
+border-radius:9px;
+background:#2878ff;
+color:white;
+font-size:17px;
+font-weight:bold;
+cursor:pointer
 }
 </style>
 </head>
@@ -300,1676 +163,1363 @@ canvas{
 <canvas id="game"></canvas>
 
 <div id="startScreen">
-    <div class="startBox">
-        <h1>VORTEX <span>BATTLE</span></h1>
-        <p>
-            یک مسیر برای هواپیما انتخاب می‌شود.<br>
-            با <b>SPACE</b> از هواپیما بپر، چترت را باز کن و در مپ فرود بیا.
-        </p>
-        <button id="startButton">ENTER BATTLE</button>
-    </div>
+<div class="startBox">
+<h1>VORTEX BATTLE ZONE</h1>
+<p>Top-Down Battle Royale</p>
+<button id="startButton">START GAME</button>
 </div>
-
-<div id="deathScreen">
-    <div class="deathBox">
-        <h1>ELIMINATED</h1>
-        <p>You were eliminated.</p>
-        <br>
-        <button id="restartButton">PLAY AGAIN</button>
-    </div>
 </div>
 
 <div id="hud">
 
-    <div id="top">
-        VORTEX BATTLE ZONE
-        <br>
-        <small>
-            WASD = Move |
-            Mouse = Aim |
-            Click = Shoot |
-            R = Reload
-        </small>
-    </div>
+<div id="top">
+<b>VORTEX BATTLE ZONE</b>
+<br>
+<small>WASD Move • Mouse Aim • Click Shoot • R Reload</small>
+</div>
 
-    <div id="phase">WAITING</div>
+<canvas id="minimap" width="190" height="190"></canvas>
 
-    <canvas id="minimap" width="210" height="210"></canvas>
+<div id="health">
+<div id="healthBar"></div>
+<div id="healthText">100 HP</div>
+</div>
 
-    <div id="health">
-        <div id="healthBar"></div>
-        <div id="healthText">100 HP</div>
-    </div>
+<button id="reload">RELOAD</button>
 
-    <button id="reload">RELOAD</button>
+<div id="ammo">30 / 120</div>
 
-    <div id="ammo">30 / 120</div>
-
-    <div id="message"></div>
-
-    <div id="dropInfo"></div>
-
-    <div id="crosshair"></div>
-
-    <div id="zoneWarning">
-        ⚠ OUTSIDE SAFE ZONE
-    </div>
+<div id="message"></div>
 
 </div>
 
 <script>
 
-/* =========================================================
+/* =====================================================
    CANVAS
-========================================================= */
+===================================================== */
 
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
 
-const minimap = document.getElementById("minimap");
-const mini = minimap.getContext("2d");
-
-const healthBar = document.getElementById("healthBar");
-const healthText = document.getElementById("healthText");
-const ammoText = document.getElementById("ammo");
-const reloadButton = document.getElementById("reload");
-const message = document.getElementById("message");
-
-const phaseText = document.getElementById("phase");
-const dropInfo = document.getElementById("dropInfo");
-const zoneWarning = document.getElementById("zoneWarning");
-
-const startScreen = document.getElementById("startScreen");
-const startButton = document.getElementById("startButton");
-
-const deathScreen = document.getElementById("deathScreen");
-const restartButton = document.getElementById("restartButton");
+const minimap=document.getElementById("minimap");
+const mini=minimap.getContext("2d");
 
 function resize(){
-
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
 }
 
 window.addEventListener("resize",resize);
 resize();
 
 
-/* =========================================================
+/* =====================================================
    WORLD
-========================================================= */
+===================================================== */
 
-const WORLD_WIDTH = 5000;
-const WORLD_HEIGHT = 5000;
+const WORLD_WIDTH=5000;
+const WORLD_HEIGHT=5000;
 
-const keys = {};
+const keys={};
 
-let mouseX = canvas.width/2;
-let mouseY = canvas.height/2;
-let mouseDown = false;
+let mouseX=canvas.width/2;
+let mouseY=canvas.height/2;
+let mouseDown=false;
 
 document.addEventListener("keydown",e=>{
 
-    const key=e.key.toLowerCase();
+keys[e.key.toLowerCase()]=true;
 
-    keys[key]=true;
-
-    if(key==="r"){
-        reload();
-    }
-
-    if(e.code==="Space"){
-        e.preventDefault();
-
-        if(gameState==="plane"){
-            jumpFromPlane();
-        }
-        else if(gameState==="fall"){
-            openParachute();
-        }
-    }
+if(e.key.toLowerCase()==="r")
+reload();
 
 });
 
 document.addEventListener("keyup",e=>{
-    keys[e.key.toLowerCase()]=false;
+keys[e.key.toLowerCase()]=false;
 });
 
 canvas.addEventListener("mousemove",e=>{
-
-    mouseX=e.clientX;
-    mouseY=e.clientY;
-
+mouseX=e.clientX;
+mouseY=e.clientY;
 });
 
-canvas.addEventListener("mousedown",e=>{
-
-    if(e.button===0){
-        mouseDown=true;
-    }
-
+canvas.addEventListener("mousedown",()=>{
+mouseDown=true;
 });
 
-document.addEventListener("mouseup",e=>{
-
-    if(e.button===0){
-        mouseDown=false;
-    }
-
+document.addEventListener("mouseup",()=>{
+mouseDown=false;
 });
 
 
-/* =========================================================
-   GAME STATE
-========================================================= */
+/* =====================================================
+   HELPERS
+===================================================== */
 
-let gameState="waiting";
+function random(min,max){
+return Math.random()*(max-min)+min;
+}
 
-let gameStarted=false;
-
-let gameOver=false;
-
-
-/*
-waiting
-plane
-fall
-parachute
-playing
-dead
-*/
-
-let stateTimer=0;
+function distance(a,b,c,d){
+return Math.hypot(a-c,b-d);
+}
 
 
-/* =========================================================
+/* =====================================================
    PLAYER
-========================================================= */
+===================================================== */
 
 const player={
-
-    x:WORLD_WIDTH/2,
-    y:WORLD_HEIGHT/2,
-
-    speed:4.2,
-
-    angle:0,
-
-    hp:100,
-
-    ammo:30,
-
-    reserve:120,
-
-    alive:true,
-
-    landed:false,
-
-    altitude:0,
-
-    parachute:false,
-
-    fallingSpeed:0,
-
-    airControl:3.5
-
+x:2500,
+y:2500,
+speed:4,
+angle:0,
+hp:100,
+ammo:30,
+reserve:120,
+alive:true
 };
 
 
-/* =========================================================
+/* =====================================================
    CAMERA
-========================================================= */
+===================================================== */
 
 const camera={
-    x:0,
-    y:0
+x:0,
+y:0
 };
 
 
-/* =========================================================
+/* =====================================================
    MAP
-========================================================= */
+===================================================== */
 
 const buildings=[];
 const trees=[];
 const rocks=[];
 const crates=[];
-const roads=[];
-const lakes=[];
+const cars=[];
 const bushes=[];
+const roads=[];
 
 
-/* =========================================================
-   RANDOM
-========================================================= */
-
-function random(min,max){
-
-    return Math.random()*(max-min)+min;
-
-}
-
-function randomInt(min,max){
-
-    return Math.floor(random(min,max+1));
-
-}
-
-
-/* =========================================================
-   ROADS
-========================================================= */
+/* roads */
 
 roads.push({
-
-    x:0,
-    y:2250,
-    w:WORLD_WIDTH,
-    h:500
-
+x:0,
+y:2350,
+w:5000,
+h:300
 });
 
 roads.push({
-
-    x:2250,
-    y:0,
-    w:500,
-    h:WORLD_HEIGHT
-
+x:2350,
+y:0,
+w:300,
+h:5000
 });
 
 
-/* =========================================================
-   LAKES
-========================================================= */
+/* buildings */
 
-for(let i=0;i<4;i++){
+for(let i=0;i<65;i++){
 
-    lakes.push({
+let w=random(100,280);
+let h=random(100,240);
 
-        x:random(400,WORLD_WIDTH-700),
-        y:random(400,WORLD_HEIGHT-700),
+let x=random(100,4900-w);
+let y=random(100,4900-h);
 
-        w:random(250,650),
-        h:random(180,500)
-
-    });
-
-}
-
-
-/* =========================================================
-   BUILDINGS
-========================================================= */
-
-for(let i=0;i<75;i++){
-
-    let w=random(100,280);
-    let h=random(100,230);
-
-    let x=random(100,WORLD_WIDTH-w-100);
-    let y=random(100,WORLD_HEIGHT-h-100);
-
-    if(
-        x<2750 &&
-        x+w>2250 &&
-        y<2750 &&
-        y+h>2250
-    ){
-        i--;
-        continue;
-    }
-
-    buildings.push({
-
-        x,
-        y,
-        w,
-        h,
-
-        roof:Math.random()>.5,
-
-        doorSide:randomInt(0,3),
-
-        interior:false
-
-    });
+buildings.push({
+x,
+y,
+w,
+h,
+color:Math.random()>.5?"#353a3d":"#42484a"
+});
 
 }
 
 
-/* =========================================================
-   TREES
-========================================================= */
+/* trees */
 
 for(let i=0;i<750;i++){
 
-    trees.push({
-
-        x:random(50,WORLD_WIDTH-50),
-        y:random(50,WORLD_HEIGHT-50),
-
-        size:random(12,30),
-
-        type:randomInt(0,2)
-
-    });
+trees.push({
+x:random(30,4970),
+y:random(30,4970),
+size:random(12,27)
+});
 
 }
 
 
-/* =========================================================
-   ROCKS
-========================================================= */
+/* rocks */
 
 for(let i=0;i<250;i++){
 
-    rocks.push({
-
-        x:random(50,WORLD_WIDTH-50),
-        y:random(50,WORLD_HEIGHT-50),
-
-        size:random(8,28)
-
-    });
+rocks.push({
+x:random(30,4970),
+y:random(30,4970),
+size:random(7,24)
+});
 
 }
 
 
-/* =========================================================
-   CRATES
-========================================================= */
+/* crates */
 
 for(let i=0;i<180;i++){
 
-    crates.push({
-
-        x:random(100,WORLD_WIDTH-100),
-        y:random(100,WORLD_HEIGHT-100)
-
-    });
+crates.push({
+x:random(50,4950),
+y:random(50,4950)
+});
 
 }
 
 
-/* =========================================================
-   BUSHES
-========================================================= */
+/* cars */
+
+for(let i=0;i<80;i++){
+
+cars.push({
+x:random(100,4900),
+y:random(100,4900),
+angle:Math.random()*Math.PI*2
+});
+
+}
+
+
+/* bushes */
 
 for(let i=0;i<500;i++){
 
-    bushes.push({
-
-        x:random(30,WORLD_WIDTH-30),
-        y:random(30,WORLD_HEIGHT-30),
-
-        size:random(5,14)
-
-    });
+bushes.push({
+x:random(20,4980),
+y:random(20,4980),
+size:random(8,18)
+});
 
 }
 
 
-/* =========================================================
+/* =====================================================
    ENEMIES
-========================================================= */
+===================================================== */
 
 const enemies=[];
 
 for(let i=0;i<25;i++){
 
-    enemies.push({
-
-        x:random(300,WORLD_WIDTH-300),
-        y:random(300,WORLD_HEIGHT-300),
-
-        angle:random(0,Math.PI*2),
-
-        hp:100,
-
-        speed:random(.7,1.2),
-
-        cooldown:randomInt(0,120),
-
-        alive:true
-
-    });
+enemies.push({
+x:random(300,4700),
+y:random(300,4700),
+angle:0,
+hp:100,
+cooldown:random(20,100),
+alive:true
+});
 
 }
 
 
-/* =========================================================
+/* =====================================================
    BULLETS
-========================================================= */
+===================================================== */
 
 const bullets=[];
 
 
-/* =========================================================
+/* =====================================================
    ENEMY BULLETS
-========================================================= */
+===================================================== */
 
 const enemyBullets=[];
 
 
-/* =========================================================
-   SAFE ZONE
-========================================================= */
-
-const safeZone={
-
-    x:WORLD_WIDTH/2,
-    y:WORLD_HEIGHT/2,
-
-    radius:2200,
-
-    targetRadius:2200,
-
-    shrinkSpeed:.08
-
-};
-
-let zoneDamageTimer=0;
-
-
-/* =========================================================
-   PLANE
-========================================================= */
-
-const plane={
-
-    active:false,
-
-    x:0,
-    y:0,
-
-    startX:0,
-    startY:0,
-
-    endX:0,
-    endY:0,
-
-    angle:0,
-
-    progress:0,
-
-    speed:0.0018,
-
-    length:800
-
-};
-
-
-/* =========================================================
-   DROP POSITION
-========================================================= */
-
-let dropX=0;
-let dropY=0;
-
-
-/* =========================================================
-   CREATE PLANE ROUTE
-========================================================= */
-
-function createPlaneRoute(){
-
-    const side=randomInt(0,3);
-
-    if(side===0){
-
-        plane.startX=-500;
-        plane.startY=random(500,WORLD_HEIGHT-500);
-
-        plane.endX=WORLD_WIDTH+500;
-        plane.endY=random(500,WORLD_HEIGHT-500);
-
-    }
-
-    else if(side===1){
-
-        plane.startX=WORLD_WIDTH+500;
-        plane.startY=random(500,WORLD_HEIGHT-500);
-
-        plane.endX=-500;
-        plane.endY=random(500,WORLD_HEIGHT-500);
-
-    }
-
-    else if(side===2){
-
-        plane.startX=random(500,WORLD_WIDTH-500);
-        plane.startY=-500;
-
-        plane.endX=random(500,WORLD_WIDTH-500);
-        plane.endY=WORLD_HEIGHT+500;
-
-    }
-
-    else{
-
-        plane.startX=random(500,WORLD_WIDTH-500);
-        plane.startY=WORLD_HEIGHT+500;
-
-        plane.endX=random(500,WORLD_WIDTH-500);
-        plane.endY=-500;
-
-    }
-
-    plane.x=plane.startX;
-    plane.y=plane.startY;
-
-    plane.progress=0;
-
-    plane.angle=Math.atan2(
-        plane.endY-plane.startY,
-        plane.endX-plane.startX
-    );
-
-}
-
-
-/* =========================================================
-   START GAME
-========================================================= */
-
-startButton.addEventListener("click",startGame);
-
-function startGame(){
-
-    startScreen.style.display="none";
-
-    gameStarted=true;
-    gameOver=false;
-
-    player.alive=true;
-    player.hp=100;
-    player.ammo=30;
-    player.reserve=120;
-
-    player.landed=false;
-    player.parachute=false;
-
-    createPlaneRoute();
-
-    gameState="plane";
-
-    plane.active=true;
-
-    phaseText.textContent="✈ PLANE";
-
-    dropInfo.textContent="SPACE = JUMP FROM PLANE";
-
-}
-
-
-/* =========================================================
-   JUMP FROM PLANE
-========================================================= */
-
-function jumpFromPlane(){
-
-    if(gameState!=="plane") return;
-
-    gameState="fall";
-
-    player.x=plane.x;
-    player.y=plane.y;
-
-    dropX=player.x;
-    dropY=player.y;
-
-    player.altitude=1000;
-
-    player.parachute=false;
-
-    player.fallingSpeed=8;
-
-    phaseText.textContent="⬇ FREE FALL";
-
-    dropInfo.textContent=
-        "FREE FALL • SPACE = OPEN PARACHUTE";
-
-}
-
-
-/* =========================================================
-   PARACHUTE
-========================================================= */
-
-function openParachute(){
-
-    if(gameState!=="fall") return;
-
-    if(player.altitude<100) return;
-
-    player.parachute=true;
-
-    gameState="parachute";
-
-    phaseText.textContent="🪂 PARACHUTE";
-
-    dropInfo.textContent=
-        "WASD = CONTROL LANDING";
-
-}
-
-
-/* =========================================================
-   LAND
-========================================================= */
-
-function landPlayer(){
-
-    player.altitude=0;
-
-    player.parachute=false;
-
-    player.landed=true;
-
-    gameState="playing";
-
-    phaseText.textContent="🎯 BATTLE";
-
-    dropInfo.textContent="";
-
-}
-
-
-/* =========================================================
-   PLANE UPDATE
-========================================================= */
-
-function updatePlane(){
-
-    if(!plane.active) return;
-
-    plane.progress+=plane.speed;
-
-    if(plane.progress>=1){
-
-        plane.progress=1;
-
-        plane.active=false;
-
-        if(gameState==="plane"){
-
-            jumpFromPlane();
-
-        }
-
-    }
-
-    plane.x=
-        plane.startX+
-        (plane.endX-plane.startX)*plane.progress;
-
-    plane.y=
-        plane.startY+
-        (plane.endY-plane.startY)*plane.progress;
-
-}
-
-
-/* =========================================================
-   AIR UPDATE
-========================================================= */
-
-function updateAir(){
-
-    if(gameState!=="fall" && gameState!=="parachute"){
-        return;
-    }
-
-    let dx=0;
-    let dy=0;
-
-    if(keys["w"])dy--;
-    if(keys["s"])dy++;
-    if(keys["a"])dx--;
-    if(keys["d"])dx++;
-
-    if(dx!==0 || dy!==0){
-
-        const len=Math.hypot(dx,dy);
-
-        dx/=len;
-        dy/=len;
-
-        player.x+=dx*player.airControl;
-        player.y+=dy*player.airControl;
-
-    }
-
-    player.x=Math.max(20,Math.min(
-        WORLD_WIDTH-20,
-        player.x
-    ));
-
-    player.y=Math.max(20,Math.min(
-        WORLD_HEIGHT-20,
-        player.y
-    ));
-
-    if(gameState==="fall"){
-
-        player.altitude-=player.fallingSpeed;
-
-        player.fallingSpeed+=.08;
-
-        if(player.altitude<=150){
-
-            openParachute();
-
-        }
-
-    }
-
-    else if(gameState==="parachute"){
-
-        player.altitude-=2.2;
-
-        if(player.altitude<=0){
-
-            landPlayer();
-
-        }
-
-    }
-
-}
-
-
-/* =========================================================
+/* =====================================================
    RELOAD
-========================================================= */
+===================================================== */
 
 let reloading=false;
 
 function reload(){
 
-    if(!player.alive) return;
+if(reloading)return;
 
-    if(gameState!=="playing") return;
+if(player.ammo>=30)return;
 
-    if(reloading)return;
+if(player.reserve<=0)return;
 
-    if(player.ammo>=30)return;
+reloading=true;
 
-    if(player.reserve<=0)return;
+showMessage("RELOADING...");
 
-    reloading=true;
+setTimeout(()=>{
 
-    message.textContent="RELOADING...";
-    message.style.opacity=1;
+let needed=30-player.ammo;
 
-    setTimeout(()=>{
+let amount=Math.min(needed,player.reserve);
 
-        const needed=30-player.ammo;
+player.ammo+=amount;
+player.reserve-=amount;
 
-        const amount=Math.min(
-            needed,
-            player.reserve
-        );
+reloading=false;
 
-        player.ammo+=amount;
+hideMessage();
 
-        player.reserve-=amount;
-
-        reloading=false;
-
-        message.style.opacity=0;
-
-    },1000);
+},1000);
 
 }
 
-reloadButton.addEventListener("click",reload);
+document.getElementById("reload").addEventListener("click",reload);
 
 
-/* =========================================================
+/* =====================================================
+   MESSAGE
+===================================================== */
+
+const message=document.getElementById("message");
+
+function showMessage(text){
+
+message.textContent=text;
+message.style.opacity=1;
+
+}
+
+function hideMessage(){
+
+message.style.opacity=0;
+
+}
+
+
+/* =====================================================
    SHOOT
-========================================================= */
+===================================================== */
 
 let lastShot=0;
 
 function shoot(){
 
-    if(gameState!=="playing")return;
+if(!player.alive)return;
 
-    if(reloading)return;
+if(reloading)return;
 
-    if(player.ammo<=0){
+if(player.ammo<=0){
 
-        reload();
+reload();
 
-        return;
-
-    }
-
-    const now=Date.now();
-
-    if(now-lastShot<120)return;
-
-    lastShot=now;
-
-    player.ammo--;
-
-    bullets.push({
-
-        x:player.x,
-        y:player.y,
-
-        angle:player.angle,
-
-        speed:18,
-
-        life:100
-
-    });
+return;
 
 }
 
+let now=Date.now();
 
-/* =========================================================
-   COLLISION WITH BUILDINGS
-========================================================= */
+if(now-lastShot<120)return;
 
-function circleRectCollision(cx,cy,r,rect){
+lastShot=now;
 
-    const closestX=Math.max(
-        rect.x,
-        Math.min(cx,rect.x+rect.w)
-    );
+player.ammo--;
 
-    const closestY=Math.max(
-        rect.y,
-        Math.min(cy,rect.y+rect.h)
-    );
+bullets.push({
 
-    const dx=cx-closestX;
-    const dy=cy-closestY;
-
-    return dx*dx+dy*dy<r*r;
-
-}
-
-
-/* =========================================================
-   PLAYER MOVEMENT
-========================================================= */
-
-function updatePlayer(){
-
-    if(gameState!=="playing"){
-
-        updateCamera();
-
-        return;
-
-    }
-
-    let dx=0;
-    let dy=0;
-
-    if(keys["w"])dy--;
-    if(keys["s"])dy++;
-    if(keys["a"])dx--;
-    if(keys["d"])dx++;
-
-    if(dx!==0 || dy!==0){
-
-        const len=Math.hypot(dx,dy);
-
-        dx/=len;
-        dy/=len;
-
-        const oldX=player.x;
-        const oldY=player.y;
-
-        player.x+=dx*player.speed;
-        player.y+=dy*player.speed;
-
-        let blocked=false;
-
-        for(const b of buildings){
-
-            if(circleRectCollision(
-                player.x,
-                player.y,
-                16,
-                b
-            )){
-
-                blocked=true;
-                break;
-
-            }
-
-        }
-
-        if(blocked){
-
-            player.x=oldX;
-            player.y=oldY;
-
-        }
-
-    }
-
-    player.x=Math.max(
-        25,
-        Math.min(WORLD_WIDTH-25,player.x)
-    );
-
-    player.y=Math.max(
-        25,
-        Math.min(WORLD_HEIGHT-25,player.y)
-    );
-
-    updateCamera();
-
-    player.angle=Math.atan2(
-        mouseY-canvas.height/2,
-        mouseX-canvas.width/2
-    );
-
-    if(mouseDown){
-
-        shoot();
-
-    }
-
-}
-
-
-/* =========================================================
-   CAMERA
-========================================================= */
-
-function updateCamera(){
-
-    camera.x=player.x-canvas.width/2;
-    camera.y=player.y-canvas.height/2;
-
-    camera.x=Math.max(
-        0,
-        Math.min(
-            WORLD_WIDTH-canvas.width,
-            camera.x
-        )
-    );
-
-    camera.y=Math.max(
-        0,
-        Math.min(
-            WORLD_HEIGHT-canvas.height,
-            camera.y
-        )
-    );
-
-}
-
-
-/* =========================================================
-   BULLETS
-========================================================= */
-
-function updateBullets(){
-
-    for(let i=bullets.length-1;i>=0;i--){
-
-        const bullet=bullets[i];
-
-        bullet.x+=
-            Math.cos(bullet.angle)*
-            bullet.speed;
-
-        bullet.y+=
-            Math.sin(bullet.angle)*
-            bullet.speed;
-
-        bullet.life--;
-
-        let remove=false;
-
-        for(const b of buildings){
-
-            if(
-                bullet.x>b.x &&
-                bullet.x<b.x+b.w &&
-                bullet.y>b.y &&
-                bullet.y<b.y+b.h
-            ){
-
-                remove=true;
-                break;
-
-            }
-
-        }
-
-        for(const enemy of enemies){
-
-            if(!enemy.alive)continue;
-
-            const distance=Math.hypot(
-                bullet.x-enemy.x,
-                bullet.y-enemy.y
-            );
-
-            if(distance<24){
-
-                enemy.hp-=50;
-
-                if(enemy.hp<=0){
-
-                    enemy.hp=0;
-                    enemy.alive=false;
-
-                }
-
-                remove=true;
-
-                break;
-
-            }
-
-        }
-
-        if(
-            bullet.life<=0 ||
-            remove ||
-            bullet.x<0 ||
-            bullet.y<0 ||
-            bullet.x>WORLD_WIDTH ||
-            bullet.y>WORLD_HEIGHT
-        ){
-
-            bullets.splice(i,1);
-
-        }
-
-    }
-
-}
-
-
-/* =========================================================
-   ENEMY SHOOTING
-========================================================= */
-
-function enemyShoot(enemy){
-
-    const angle=Math.atan2(
-        player.y-enemy.y,
-        player.x-enemy.x
-    );
-
-    enemyBullets.push({
-
-        x:enemy.x,
-        y:enemy.y,
-
-        angle:angle,
-
-        speed:7,
-
-        life:100
-
-    });
-
-}
-
-
-/* =========================================================
-   ENEMY UPDATE
-========================================================= */
-
-function updateEnemies(){
-
-    if(gameState!=="playing")return;
-
-    for(const enemy of enemies){
-
-        if(!enemy.alive)continue;
-
-        const dx=player.x-enemy.x;
-        const dy=player.y-enemy.y;
-
-        const distance=Math.hypot(dx,dy);
-
-        enemy.angle=Math.atan2(dy,dx);
-
-        enemy.cooldown--;
-
-        if(distance>300){
-
-            enemy.x+=
-                Math.cos(enemy.angle)*
-                enemy.speed;
-
-            enemy.y+=
-                Math.sin(enemy.angle)*
-                enemy.speed;
-
-        }
-
-        else if(distance<700){
-
-            if(enemy.cooldown<=0){
-
-                enemyShoot(enemy);
-
-                enemy.cooldown=randomInt(70,140);
-
-            }
-
-        }
-
-        enemy.x=Math.max(
-            20,
-            Math.min(WORLD_WIDTH-20,enemy.x)
-        );
-
-        enemy.y=Math.max(
-            20,
-            Math.min(WORLD_HEIGHT-20,enemy.y)
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   ENEMY BULLETS
-========================================================= */
-
-function updateEnemyBullets(){
-
-    if(gameState!=="playing")return;
-
-    for(let i=enemyBullets.length-1;i>=0;i--){
-
-        const bullet=enemyBullets[i];
-
-        bullet.x+=
-            Math.cos(bullet.angle)*
-            bullet.speed;
-
-        bullet.y+=
-            Math.sin(bullet.angle)*
-            bullet.speed;
-
-        bullet.life--;
-
-        let hitWall=false;
-
-        for(const b of buildings){
-
-            if(
-                bullet.x>b.x &&
-                bullet.x<b.x+b.w &&
-                bullet.y>b.y &&
-                bullet.y<b.y+b.h
-            ){
-
-                hitWall=true;
-                break;
-
-            }
-
-        }
-
-        const distance=Math.hypot(
-            bullet.x-player.x,
-            bullet.y-player.y
-        );
-
-        if(distance<18){
-
-            player.hp-=12;
-
-            hitWall=true;
-
-            if(player.hp<=0){
-
-                player.hp=0;
-
-                killPlayer();
-
-            }
-
-        }
-
-        if(
-            bullet.life<=0 ||
-            hitWall
-        ){
-
-            enemyBullets.splice(i,1);
-
-        }
-
-    }
-
-}
-
-
-/* =========================================================
-   SAFE ZONE
-========================================================= */
-
-function updateZone(){
-
-    if(gameState!=="playing")return;
-
-    safeZone.targetRadius=850;
-
-    if(safeZone.radius>safeZone.targetRadius){
-
-        safeZone.radius-=safeZone.shrinkSpeed;
-
-    }
-
-    const distance=Math.hypot(
-        player.x-safeZone.x,
-        player.y-safeZone.y
-    );
-
-    if(distance>safeZone.radius){
-
-        zoneWarning.style.opacity=1;
-
-        zoneDamageTimer++;
-
-        if(zoneDamageTimer>20){
-
-            player.hp-=1;
-
-            zoneDamageTimer=0;
-
-        }
-
-        if(player.hp<=0){
-
-            player.hp=0;
-
-            killPlayer();
-
-        }
-
-    }
-    else{
-
-        zoneWarning.style.opacity=0;
-        zoneDamageTimer=0;
-
-    }
-
-}
-
-
-/* =========================================================
-   PLAYER DEATH
-========================================================= */
-
-function killPlayer(){
-
-    if(!player.alive)return;
-
-    player.alive=false;
-
-    gameState="dead";
-
-    phaseText.textContent="ELIMINATED";
-
-    deathScreen.style.display="flex";
-
-}
-
-
-/* =========================================================
-   RESTART
-========================================================= */
-
-restartButton.addEventListener("click",()=>{
-
-    location.reload();
+x:player.x,
+y:player.y,
+angle:player.angle,
+speed:17,
+life:100
 
 });
 
+}
 
-/* =========================================================
+
+/* =====================================================
+   COLLISION WITH BUILDINGS
+===================================================== */
+
+function insideBuilding(x,y){
+
+for(const b of buildings){
+
+if(
+x>b.x &&
+x<b.x+b.w &&
+y>b.y &&
+y<b.y+b.h
+){
+
+return b;
+
+}
+
+}
+
+return null;
+
+}
+
+
+/* =====================================================
    DRAW WORLD
-========================================================= */
+===================================================== */
 
 function drawWorld(){
 
-    ctx.fillStyle="#66755a";
+/* grass */
 
-    ctx.fillRect(
-        0,
-        0,
-        WORLD_WIDTH,
-        WORLD_HEIGHT
-    );
+ctx.fillStyle="#65745a";
 
+ctx.fillRect(
+-camera.x,
+-camera.y,
+WORLD_WIDTH,
+WORLD_HEIGHT
+);
 
-    /* grass patches */
 
-    for(let x=0;x<WORLD_WIDTH;x+=80){
+/* grass texture */
 
-        for(let y=0;y<WORLD_HEIGHT;y+=80){
+ctx.fillStyle="rgba(30,55,30,.25)";
 
-            const variation=
-                ((x*17+y*31)%100)/100;
+for(let x=0;x<WORLD_WIDTH;x+=70){
 
-            ctx.fillStyle=
-                variation>.5
-                ?"rgba(45,80,43,.18)"
-                :"rgba(100,130,70,.10)";
+for(let y=0;y<WORLD_HEIGHT;y+=70){
 
-            ctx.fillRect(
-                x,
-                y,
-                80,
-                80
-            );
+ctx.fillRect(
+x-camera.x,
+y-camera.y,
+2,
+2
+);
 
-        }
+}
 
-    }
+}
 
 
-    /* lakes */
+/* roads */
 
-    for(const lake of lakes){
+ctx.fillStyle="#30363a";
 
-        ctx.fillStyle="#315c70";
+for(const road of roads){
 
-        ctx.beginPath();
+ctx.fillRect(
+road.x-camera.x,
+road.y-camera.y,
+road.w,
+road.h
+);
 
-        ctx.ellipse(
-            lake.x-camera.x+lake.w/2,
-            lake.y-camera.y+lake.h/2,
-            lake.w/2,
-            lake.h/2,
-            0,
-            0,
-            Math.PI*2
-        );
+}
 
-        ctx.fill();
 
-        ctx.strokeStyle="#6e9baa";
-        ctx.lineWidth=4;
+/* road borders */
 
-        ctx.stroke();
+ctx.strokeStyle="#202326";
+ctx.lineWidth=8;
 
-    }
+for(const road of roads){
 
+ctx.strokeRect(
+road.x-camera.x,
+road.y-camera.y,
+road.w,
+road.h
+);
 
-    /* roads */
+}
 
-    ctx.fillStyle="#30363a";
 
-    for(const road of roads){
+/* road lines */
 
-        ctx.fillRect(
-            road.x-camera.x,
-            road.y-camera.y,
-            road.w,
-            road.h
-        );
+ctx.strokeStyle="#d8bd52";
+ctx.lineWidth=4;
+ctx.setLineDash([35,35]);
 
-    }
+ctx.beginPath();
 
+ctx.moveTo(
+0-camera.x,
+2500-camera.y
+);
 
-    /* road edges */
+ctx.lineTo(
+5000-camera.x,
+2500-camera.y
+);
 
-    ctx.strokeStyle="#777d7c";
-    ctx.lineWidth=4;
-    ctx.setLineDash([]);
+ctx.stroke();
 
-    ctx.beginPath();
+ctx.beginPath();
 
-    ctx.moveTo(
-        0-camera.x,
-        2250-camera.y
-    );
+ctx.moveTo(
+2500-camera.x,
+0-camera.y
+);
 
-    ctx.lineTo(
-        WORLD_WIDTH-camera.x,
-        2250-camera.y
-    );
+ctx.lineTo(
+2500-camera.x,
+5000-camera.y
+);
 
-    ctx.moveTo(
-        0-camera.x,
-        2750-camera.y
-    );
+ctx.stroke();
 
-    ctx.lineTo(
-        WORLD_WIDTH-camera.x,
-        2750-camera.y
-    );
+ctx.setLineDash([]);
 
-    ctx.moveTo(
-        2250-camera.x,
-        0-camera.y
-    );
 
-    ctx.lineTo(
-        2250-camera.x,
-        WORLD_HEIGHT-camera.y
-    );
+/* bushes */
 
-    ctx.moveTo(
-        2750-camera.x,
-        0-camera.y
-    );
+for(const bush of bushes){
 
-    ctx.lineTo(
-        2750-camera.x,
-        WORLD_HEIGHT-camera.y
-    );
+let x=bush.x-camera.x;
+let y=bush.y-camera.y;
 
-    ctx.stroke();
+ctx.fillStyle="#294b2c";
 
+ctx.beginPath();
 
-    /* road lines */
+ctx.arc(
+x,
+y,
+bush.size,
+0,
+Math.PI*2
+);
 
-    ctx.strokeStyle="#d5bd4c";
-    ctx.lineWidth=5;
-    ctx.setLineDash([40,35]);
+ctx.fill();
 
-    ctx.beginPath();
+}
 
-    ctx.moveTo(
-        0-camera.x,
-        2500-camera.y
-    );
 
-    ctx.lineTo(
-        WORLD_WIDTH-camera.x,
-        2500-camera.y
-    );
+/* rocks */
 
-    ctx.stroke();
+for(const rock of rocks){
 
-    ctx.beginPath();
+ctx.fillStyle="#646966";
 
-    ctx.moveTo(
-        2500-camera.x,
-        0-camera.y
-    );
+ctx.beginPath();
 
-    ctx.lineTo(
-        2500-camera.x,
-        WORLD_HEIGHT-camera.y
-    );
+ctx.arc(
+rock.x-camera.x,
+rock.y-camera.y,
+rock.size,
+0,
+Math.PI*2
+);
 
-    ctx.stroke();
+ctx.fill();
 
-    ctx.setLineDash([]);
+}
 
 
-    /* bushes */
+/* trees */
 
-    for(const bush of bushes){
+for(const tree of trees){
 
-        const x=bush.x-camera.x;
-        const y=bush.y-camera.y;
+let x=tree.x-camera.x;
+let y=tree.y-camera.y;
 
-        ctx.fillStyle="#315c32";
+ctx.fillStyle="#513b29";
 
-        ctx.beginPath();
+ctx.fillRect(
+x-4,
+y,
+8,
+tree.size
+);
 
-        ctx.arc(
-            x,
-            y,
-            bush.size,
-            0,
-            Math.PI*2
-        );
+ctx.fillStyle="#204d2a";
 
-        ctx.fill();
+ctx.beginPath();
 
-    }
+ctx.arc(
+x,
+y,
+tree.size,
+0,
+Math.PI*2
+);
 
+ctx.fill();
 
-    /* trees */
+ctx.fillStyle="#34713c";
 
-    for(const tree of trees){
+ctx.beginPath();
 
-        const x=tree.x-camera.x;
-        const y=tree.y-camera.y;
+ctx.arc(
+x-7,
+y-7,
+tree.size*.55,
+0,
+Math.PI*2
+);
 
-        ctx.fillStyle="#4b3423";
+ctx.fill();
 
-        ctx.fillRect(
-            x-4,
-            y,
-            8,
-            tree.size
-        );
+}
 
-        ctx.fillStyle=
-            tree.type===0
-            ?"#1d4829"
-            :"#285d31";
 
-        ctx.beginPath();
+/* crates */
 
-        ctx.arc(
-            x,
-            y,
-            tree.size,
-            0,
-            Math.PI*2
-        );
+for(const crate of crates){
 
-        ctx.fill();
+let x=crate.x-camera.x;
+let y=crate.y-camera.y;
 
-        ctx.fillStyle="#3d7541";
+ctx.fillStyle="#a46e35";
 
-        ctx.beginPath();
+ctx.fillRect(x,y,28,28);
 
-        ctx.arc(
-            x-7,
-            y-7,
-            tree.size*.5,
-            0,
-            Math.PI*2
-        );
+ctx.strokeStyle="#543719";
 
-        ctx.fill();
+ctx.lineWidth=2;
 
-    }
+ctx.strokeRect(x,y,28,28);
 
+}
 
-    /* rocks */
 
-    for(const rock of rocks){
+/* cars */
 
-        ctx.fillStyle="#55595b";
+for(const car of cars){
 
-        ctx.beginPath();
+ctx.save();
 
-        ctx.arc(
-            rock.x-camera.x,
-            rock.y-camera.y,
-            rock.size,
-            0,
-            Math.PI*2
-        );
+ctx.translate(
+car.x-camera.x,
+car.y-camera.y
+);
 
-        ctx.fill();
+ctx.rotate(car.angle);
 
-        ctx.strokeStyle="#3d4042";
+ctx.fillStyle="#22272b";
 
-        ctx.stroke();
+ctx.fillRect(-25,-12,50,24);
 
-    }
+ctx.fillStyle="#15181a";
 
+ctx.fillRect(-15,-9,25,18);
 
-    /* buildings */
+ctx.fillStyle="#111";
 
-    for(const b of buildings){
+ctx.fillRect(-19,-15,10,5);
+ctx.fillRect(10,-15,10,5);
+ctx.fillRect(-19,10,10,5);
+ctx.fillRect(10,10,10,5);
 
-        const bx=b.x-camera.x;
-        const by=b.y-camera.y;
+ctx.restore();
 
-        /* shadow */
+}
 
-        ctx.fillStyle="rgba(0,0,0,.25)";
 
-        ctx.fillRect(
-            bx+10,
-            by+10,
-            b.w,
-            b.h
-        );
+/* buildings */
 
-        /* building */
+for(const b of buildings){
 
-        ctx.fillStyle="#34393b";
+let x=b.x-camera.x;
+let y=b.y-camera.y;
 
-        ctx.fillRect(
-            bx,
-            by,
-            b.w,
-            b.h
-        );
+ctx.fillStyle="rgba(0,0,0,.25)";
 
-        /* roof */
+ctx.fillRect(
+x+8,
+y+10,
+b.w,
+b.h
+);
 
-        ctx.fillStyle=b.roof
-            ?"#24282a"
-            :"#3d4143";
+ctx.fillStyle=b.color;
 
-        ctx.fillRect(
-            bx+7,
-            by+7,
-            b.w-14,
-            b.h-14
-        );
+ctx.fillRect(
+x,
+y,
+b.w,
+b.h
+);
 
 
-        /* windows */
+/* roof */
 
-        ctx.fillStyle="#9db5b8";
+ctx.fillStyle="#25292b";
 
-        for(
-            let wx=b.x+25;
-            wx<b.x+b.w-20;
-            wx+=40
-        ){
+ctx.fillRect(
+x+7,
+y+7,
+b.w-14,
+b.h-14
+);
 
-            for(
-                let wy=b.y+25;
-                wy<b.y+b.h-20;
-                wy+=40
-            ){
+
+/* windows */
+
+ctx.fillStyle="#9eb6b5";
+
+for(let wx=b.x+25;wx<b.x+b.w-20;wx+=42){
+
+for(let wy=b.y+25;wy<b.y+b.h-20;wy+=42){
+
+ctx.fillRect(
+wx-camera.x,
+wy-camera.y,
+13,
+13
+);
+
+}
+
+}
+
+
+/* door */
+
+ctx.fillStyle="#161718";
+
+ctx.fillRect(
+b.x+b.w/2-10-camera.x,
+b.y+b.h-35-camera.y,
+20,
+35
+);
+
+}
+
+}
+
+
+/* =====================================================
+   HUMAN CHARACTER
+===================================================== */
+
+function drawHuman(x,y,angle,color){
+
+ctx.save();
+
+ctx.translate(x,y);
+ctx.rotate(angle);
+
+
+/* shadow */
+
+ctx.fillStyle="rgba(0,0,0,.4)";
+
+ctx.beginPath();
+
+ctx.ellipse(
+0,
+15,
+19,
+10,
+0,
+0,
+Math.PI*2
+);
+
+ctx.fill();
+
+
+/* legs */
+
+ctx.fillStyle="#20252c";
+
+ctx.fillRect(-10,5,7,19);
+ctx.fillRect(3,5,7,19);
+
+
+/* body */
+
+ctx.fillStyle=color;
+
+ctx.fillRect(
+-13,
+-10,
+26,
+25
+);
+
+
+/* vest */
+
+ctx.fillStyle="rgba(0,0,0,.25)";
+
+ctx.fillRect(
+-8,
+-8,
+16,
+21
+);
+
+
+/* arms */
+
+ctx.fillStyle="#c99672";
+
+ctx.fillRect(-19,-8,7,19);
+ctx.fillRect(12,-8,7,19);
+
+
+/* head */
+
+ctx.fillStyle="#d5a27c";
+
+ctx.beginPath();
+
+ctx.arc(
+0,
+-22,
+10,
+0,
+Math.PI*2
+);
+
+ctx.fill();
+
+
+/* hair */
+
+ctx.fillStyle="#202020";
+
+ctx.beginPath();
+
+ctx.arc(
+0,
+-25,
+10,
+Math.PI,
+Math.PI*2
+);
+
+ctx.fill();
+
+
+/* gun */
+
+ctx.fillStyle="#151515";
+
+ctx.fillRect(
+10,
+-4,
+28,
+6
+);
+
+
+/* gun muzzle */
+
+ctx.fillStyle="#777";
+
+ctx.fillRect(
+37,
+-5,
+5,
+8
+);
+
+ctx.restore();
+
+}
+
+
+/* =====================================================
+   PLAYER
+===================================================== */
+
+function drawPlayer(){
+
+drawHuman(
+player.x-camera.x,
+player.y-camera.y,
+player.angle,
+"#398cff"
+);
+
+}
+
+
+/* =====================================================
+   ENEMIES
+===================================================== */
+
+function drawEnemies(){
+
+for(const enemy of enemies){
+
+if(!enemy.alive)continue;
+
+drawHuman(
+enemy.x-camera.x,
+enemy.y-camera.y,
+enemy.angle,
+"#d64048"
+);
+
+}
+
+}
+
+
+/* =====================================================
+   BULLETS
+===================================================== */
+
+function drawBullets(){
+
+ctx.fillStyle="#ffe66d";
+
+for(const bullet of bullets){
+
+ctx.beginPath();
+
+ctx.arc(
+bullet.x-camera.x,
+bullet.y-camera.y,
+4,
+0,
+Math.PI*2
+);
+
+ctx.fill();
+
+}
+
+ctx.fillStyle="#ff5757";
+
+for(const bullet of enemyBullets){
+
+ctx.beginPath();
+
+ctx.arc(
+bullet.x-camera.x,
+bullet.y-camera.y,
+4,
+0,
+Math.PI*2
+);
+
+ctx.fill();
+
+}
+
+}
+
+
+/* =====================================================
+   PLAYER UPDATE
+===================================================== */
+
+function updatePlayer(){
+
+if(!player.alive)return;
+
+let dx=0;
+let dy=0;
+
+if(keys["w"])dy--;
+if(keys["s"])dy++;
+if(keys["a"])dx--;
+if(keys["d"])dx++;
+
+if(dx||dy){
+
+let len=Math.hypot(dx,dy);
+
+dx/=len;
+dy/=len;
+
+let nx=player.x+dx*player.speed;
+let ny=player.y+dy*player.speed;
+
+
+/* building collision */
+
+if(!insideBuilding(nx,player.y))
+player.x=nx;
+
+if(!insideBuilding(player.x,ny))
+player.y=ny;
+
+}
+
+player.x=Math.max(30,Math.min(4970,player.x));
+player.y=Math.max(30,Math.min(4970,player.y));
+
+
+camera.x=player.x-canvas.width/2;
+camera.y=player.y-canvas.height/2;
+
+camera.x=Math.max(
+0,
+Math.min(
+WORLD_WIDTH-canvas.width,
+camera.x
+)
+);
+
+camera.y=Math.max(
+0,
+Math.min(
+WORLD_HEIGHT-canvas.height,
+camera.y
+)
+);
+
+
+player.angle=Math.atan2(
+mouseY-canvas.height/2,
+mouseX-canvas.width/2
+);
+
+
+if(mouseDown)
+shoot();
+
+}
+
+
+/* =====================================================
+   BULLET UPDATE
+===================================================== */
+
+function updateBullets(){
+
+for(let i=bullets.length-1;i>=0;i--){
+
+const bullet=bullets[i];
+
+bullet.x+=Math.cos(bullet.angle)*bullet.speed;
+bullet.y+=Math.sin(bullet.angle)*bullet.speed;
+
+bullet.life--;
+
+
+/* building collision */
+
+if(insideBuilding(bullet.x,bullet.y)){
+
+bullet.life=0;
+
+}
+
+
+/* enemy hit */
+
+for(const enemy of enemies){
+
+if(!enemy.alive)continue;
+
+if(
+distance(
+bullet.x,
+bullet.y,
+enemy.x,
+enemy.y
+)<22
+){
+
+enemy.hp-=50;
+
+bullet.life=0;
+
+if(enemy.hp<=0){
+
+enemy.alive=false;
+
+}
+
+break;
+
+}
+
+}
+
+
+if(bullet.life<=0){
+
+bullets.splice(i,1);
+
+}
+
+}
+
+}
+
+
+/* =====================================================
+   ENEMY AI
+===================================================== */
+
+function updateEnemies(){
+
+for(const enemy of enemies){
+
+if(!enemy.alive)continue;
+
+const dx=player.x-enemy.x;
+const dy=player.y-enemy.y;
+
+const dist=Math.hypot(dx,dy);
+
+enemy.angle=Math.atan2(dy,dx);
+
+
+/* move toward player */
+
+if(dist>350){
+
+let nx=enemy.x+Math.cos(enemy.angle)*.65;
+let ny=enemy.y+Math.sin(enemy.angle)*.65;
+
+if(!insideBuilding(nx,enemy.y))
+enemy.x=nx;
+
+if(!insideBuilding(enemy.x,ny))
+enemy.y=ny;
+
+}
+
+
+/* shoot */
+
+enemy.cooldown--;
+
+if(
+dist<800 &&
+enemy.cooldown<=0
+){
+
+enemyBullets.push({
+
+x:enemy.x,
+y:enemy.y,
+angle:enemy.angle,
+speed:7,
+life:130
+
+});
+
+enemy.cooldown=random(70,130);
+
+}
+
+}
+
+}
+
+
+/* =====================================================
+   ENEMY BULLETS
+===================================================== */
+
+function updateEnemyBullets(){
+
+for(let i=enemyBullets.length-1;i>=0;i--){
+
+const bullet=enemyBullets[i];
+
+bullet.x+=Math.cos(bullet.angle)*bullet.speed;
+bullet.y+=Math.sin(bullet.angle)*bullet.speed;
+
+bullet.life--;
+
+
+if(insideBuilding(bullet.x,bullet.y)){
+
+bullet.life=0;
+
+}
+
+
+if(
+distance(
+bullet.x,
+bullet.y,
+player.x,
+player.y
+)<18
+){
+
+player.hp-=10;
+
+bullet.life=0;
+
+if(player.hp<=0){
+
+player.hp=0;
+player.alive=false;
+
+showMessage("YOU DIED");
+
+}
+
+}
+
+
+if(bullet.life<=0){
+
+enemyBullets.splice(i,1);
+
+}
+
+}
+
+}
+
+
+/* =====================================================
+   MINIMAP
+===================================================== */
+
+function drawMinimap(){
+
+mini.clearRect(0,0,190,190);
+
+mini.fillStyle="#53664a";
+
+mini.fillRect(0,0,190,190);
+
+
+/* roads */
+
+mini.fillStyle="#30363a";
+
+mini.fillRect(0,89,190,12);
+mini.fillRect(89,0,12,190);
+
+
+/* buildings */
+
+mini.fillStyle="#25292a";
+
+for(const b of buildings){
+
+mini.fillRect(
+b.x/WORLD_WIDTH*190,
+b.y/WORLD_HEIGHT*190,
+b.w/WORLD_WIDTH*190,
+b.h/WORLD_HEIGHT*190
+);
+
+}
+
+
+/* enemies */
+
+mini.fillStyle="#ff4141";
+
+for(const enemy of enemies){
+
+if(!enemy.alive)continue;
+
+mini.fillRect(
+enemy.x/WORLD_WIDTH*190-2,
+enemy.y/WORLD_HEIGHT*190-2,
+4,
+4
+);
+
+}
+
+
+/* player */
+
+mini.fillStyle="#40a0ff";
+
+mini.beginPath();
+
+mini.arc(
+player.x/WORLD_WIDTH*190,
+player.y/WORLD_HEIGHT*190,
+5,
+0,
+Math.PI*2
+);
+
+mini.fill();
+
+}
+
+
+/* =====================================================
+   HUD
+===================================================== */
+
+function updateHUD(){
+
+document.getElementById("healthBar").style.width=
+player.hp+"%";
+
+document.getElementById("healthText").textContent=
+Math.ceil(player.hp)+" HP";
+
+document.getElementById("ammo").textContent=
+player.ammo+" / "+player.reserve;
+
+}
+
+
+/* =====================================================
+   GAME LOOP
+===================================================== */
+
+let gameStarted=false;
+
+function gameLoop(){
+
+if(gameStarted){
+
+updatePlayer();
+updateBullets();
+updateEnemies();
+updateEnemyBullets();
+
+ctx.clearRect(
+0,
+0,
+canvas.width,
+canvas.height
+);
+
+drawWorld();
+drawBullets();
+drawEnemies();
+drawPlayer();
+
+drawMinimap();
+updateHUD();
+
+}
+
+requestAnimationFrame(gameLoop);
+
+}
+
+
+/* =====================================================
+   START
+===================================================== */
+
+document.getElementById("startButton").addEventListener(
+"click",
+()=>{
+
+gameStarted=true;
+
+document.getElementById("startScreen").style.display="none";
+
+}
+);
+
+
+gameLoop();
+
+</script>
+
+</body>
+</html>
