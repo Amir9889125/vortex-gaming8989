@@ -1,0 +1,1771 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>VORTEX | Battle Zone</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #050507;
+            color: white;
+            font-family: Arial, sans-serif;
+            touch-action: none;
+        }
+
+        #game {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            background: #090b10;
+        }
+
+        /* HUD */
+
+        #hud {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .hud-top {
+            position: absolute;
+            top: 18px;
+            left: 18px;
+            right: 18px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+
+            direction: ltr;
+        }
+
+        .hud-box {
+            min-width: 145px;
+            padding: 12px 15px;
+
+            background: rgba(8, 8, 14, .82);
+            border: 1px solid rgba(157, 77, 255, .45);
+            border-radius: 12px;
+
+            box-shadow:
+                0 0 25px rgba(139, 44, 255, .12),
+                inset 0 0 20px rgba(139, 44, 255, .04);
+
+            backdrop-filter: blur(12px);
+        }
+
+        .hud-label {
+            color: #888;
+            font-size: 10px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .hud-value {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        #zoneInfo {
+            text-align: center;
+            direction: rtl;
+        }
+
+        #zoneTimer {
+            color: #b56cff;
+        }
+
+        #kills {
+            color: #ff4d91;
+        }
+
+        /* Health */
+
+        #healthPanel {
+            position: absolute;
+            bottom: 25px;
+            left: 25px;
+
+            width: 240px;
+            padding: 14px;
+
+            background: rgba(8, 8, 14, .88);
+            border: 1px solid rgba(139, 44, 255, .4);
+            border-radius: 14px;
+
+            direction: rtl;
+        }
+
+        .bar-title {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #aaa;
+            margin-bottom: 6px;
+        }
+
+        .bar {
+            height: 12px;
+            background: #191923;
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 9px;
+        }
+
+        .bar-fill {
+            height: 100%;
+            width: 100%;
+            transition: width .2s;
+        }
+
+        #healthBar {
+            background: linear-gradient(90deg, #ff174f, #ff4f7d);
+        }
+
+        #armorBar {
+            background: linear-gradient(90deg, #6f27ff, #b56cff);
+        }
+
+        /* Weapon */
+
+        #weaponPanel {
+            position: absolute;
+            bottom: 25px;
+            right: 25px;
+
+            min-width: 190px;
+            padding: 15px;
+
+            background: rgba(8, 8, 14, .88);
+            border: 1px solid rgba(139, 44, 255, .4);
+            border-radius: 14px;
+
+            text-align: center;
+        }
+
+        #weaponName {
+            color: #b56cff;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        #ammo {
+            margin-top: 7px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        /* Center message */
+
+        #message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+
+            transform: translate(-50%, -50%);
+
+            text-align: center;
+
+            opacity: 0;
+            pointer-events: none;
+
+            transition: .3s;
+        }
+
+        #message.show {
+            opacity: 1;
+        }
+
+        #message h1 {
+            font-size: clamp(35px, 8vw, 75px);
+            color: #b56cff;
+            text-shadow: 0 0 35px #8b2cff;
+        }
+
+        #message p {
+            margin-top: 10px;
+            color: #aaa;
+        }
+
+        /* Crosshair */
+
+        #crosshair {
+            position: fixed;
+            width: 25px;
+            height: 25px;
+
+            pointer-events: none;
+            z-index: 20;
+
+            transform: translate(-50%, -50%);
+        }
+
+        #crosshair::before,
+        #crosshair::after {
+            content: "";
+            position: absolute;
+            background: rgba(255,255,255,.85);
+        }
+
+        #crosshair::before {
+            width: 2px;
+            height: 25px;
+            left: 11px;
+            top: 0;
+        }
+
+        #crosshair::after {
+            height: 2px;
+            width: 25px;
+            left: 0;
+            top: 11px;
+        }
+
+        /* Start screen */
+
+        #startScreen {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background:
+                radial-gradient(circle at center,
+                    rgba(139,44,255,.18),
+                    rgba(5,5,7,.96) 65%);
+
+            text-align: center;
+        }
+
+        .start-card {
+            width: min(92%, 520px);
+            padding: 40px 25px;
+
+            background: rgba(12,12,20,.92);
+            border: 1px solid rgba(139,44,255,.45);
+            border-radius: 22px;
+
+            box-shadow:
+                0 0 70px rgba(139,44,255,.18),
+                inset 0 0 35px rgba(139,44,255,.04);
+        }
+
+        .logo {
+            font-size: 15px;
+            letter-spacing: 5px;
+            color: #b56cff;
+            margin-bottom: 20px;
+        }
+
+        .start-card h1 {
+            font-size: clamp(35px, 8vw, 65px);
+            margin-bottom: 10px;
+        }
+
+        .start-card h1 span {
+            color: #b56cff;
+            text-shadow: 0 0 25px #8b2cff;
+        }
+
+        .start-card p {
+            color: #888;
+            line-height: 1.9;
+            font-size: 13px;
+            margin-bottom: 25px;
+        }
+
+        #startButton,
+        #restartButton,
+        #backButton {
+            border: none;
+            color: white;
+            background: linear-gradient(135deg, #a139ff, #6414d8);
+
+            padding: 13px 25px;
+            border-radius: 9px;
+
+            font-size: 14px;
+            font-weight: bold;
+
+            cursor: pointer;
+
+            box-shadow: 0 0 30px rgba(139,44,255,.3);
+            transition: .25s;
+        }
+
+        #startButton:hover,
+        #restartButton:hover,
+        #backButton:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 35px rgba(139,44,255,.5);
+        }
+
+        #backButton {
+            margin-left: 8px;
+            background: #171720;
+            border: 1px solid #333340;
+            box-shadow: none;
+        }
+
+        /* Mobile controls */
+
+        #mobileControls {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 30;
+            pointer-events: none;
+        }
+
+        #joystick {
+            position: absolute;
+            left: 25px;
+            bottom: 100px;
+
+            width: 125px;
+            height: 125px;
+
+            border-radius: 50%;
+            background: rgba(139,44,255,.09);
+            border: 2px solid rgba(181,108,255,.25);
+        }
+
+        #joystickKnob {
+            position: absolute;
+
+            width: 52px;
+            height: 52px;
+
+            left: 50%;
+            top: 50%;
+
+            transform: translate(-50%, -50%);
+
+            border-radius: 50%;
+            background: rgba(181,108,255,.45);
+            border: 1px solid #b56cff;
+        }
+
+        #fireButton {
+            position: absolute;
+            right: 30px;
+            bottom: 105px;
+
+            width: 90px;
+            height: 90px;
+
+            border-radius: 50%;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background: rgba(255,30,90,.18);
+            border: 2px solid rgba(255,70,120,.5);
+
+            color: white;
+            font-size: 28px;
+
+            pointer-events: auto;
+        }
+
+        @media (max-width: 700px) {
+            #mobileControls {
+                display: block;
+            }
+
+            #crosshair {
+                display: none;
+            }
+
+            .hud-top {
+                top: 10px;
+                left: 10px;
+                right: 10px;
+            }
+
+            .hud-box {
+                min-width: 100px;
+                padding: 9px;
+            }
+
+            #healthPanel {
+                left: 10px;
+                bottom: 15px;
+                width: 155px;
+                padding: 10px;
+            }
+
+            #weaponPanel {
+                right: 10px;
+                bottom: 15px;
+                min-width: 130px;
+                padding: 10px;
+            }
+
+            #weaponName {
+                font-size: 11px;
+            }
+
+            #ammo {
+                font-size: 19px;
+            }
+
+            #backButton {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<canvas id="game"></canvas>
+
+<div id="crosshair"></div>
+
+<div id="hud">
+
+    <div class="hud-top">
+
+        <div class="hud-box">
+            <div class="hud-label">Kills</div>
+            <div class="hud-value" id="kills">0</div>
+        </div>
+
+        <div class="hud-box" id="zoneInfo">
+            <div class="hud-label">Safe Zone</div>
+            <div class="hud-value" id="zoneTimer">30</div>
+        </div>
+
+        <div class="hud-box">
+            <div class="hud-label">Players Left</div>
+            <div class="hud-value" id="playersLeft">11</div>
+        </div>
+
+    </div>
+
+    <div id="healthPanel">
+
+        <div class="bar-title">
+            <span>❤️ Health</span>
+            <span id="healthText">100</span>
+        </div>
+
+        <div class="bar">
+            <div id="healthBar" class="bar-fill"></div>
+        </div>
+
+        <div class="bar-title">
+            <span>🛡️ Armor</span>
+            <span id="armorText">100</span>
+        </div>
+
+        <div class="bar">
+            <div id="armorBar" class="bar-fill"></div>
+        </div>
+
+    </div>
+
+    <div id="weaponPanel">
+        <div id="weaponName">VORTEX RIFLE</div>
+        <div id="ammo">30 / 120</div>
+    </div>
+
+    <div id="message">
+        <h1 id="messageTitle">VICTORY</h1>
+        <p id="messageText">آخرین بازیکن باقی‌مانده شدی!</p>
+    </div>
+
+</div>
+
+<div id="mobileControls">
+
+    <div id="joystick">
+        <div id="joystickKnob"></div>
+    </div>
+
+    <div id="fireButton">🔫</div>
+
+</div>
+
+<div id="startScreen">
+
+    <div class="start-card">
+
+        <div class="logo">V O R T E X</div>
+
+        <h1>
+            BATTLE <span>ZONE</span>
+        </h1>
+
+        <p>
+            وارد میدان نبرد شو، سلاح پیدا کن،
+            دشمن‌ها را شکست بده و آخرین بازیکن باقی‌مانده باش.
+        </p>
+
+        <button id="startButton">🎮 شروع بازی</button>
+        <button id="backButton">← بازگشت</button>
+
+    </div>
+
+</div>
+
+<script>
+
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+const startScreen = document.getElementById("startScreen");
+const startButton = document.getElementById("startButton");
+const restartButton = document.getElementById("restartButton");
+const backButton = document.getElementById("backButton");
+
+const healthBar = document.getElementById("healthBar");
+const armorBar = document.getElementById("armorBar");
+const healthText = document.getElementById("healthText");
+const armorText = document.getElementById("armorText");
+
+const killsText = document.getElementById("kills");
+const playersLeftText = document.getElementById("playersLeft");
+const zoneTimerText = document.getElementById("zoneTimer");
+const ammoText = document.getElementById("ammo");
+
+const message = document.getElementById("message");
+const messageTitle = document.getElementById("messageTitle");
+const messageText = document.getElementById("messageText");
+
+const crosshair = document.getElementById("crosshair");
+
+let W = window.innerWidth;
+let H = window.innerHeight;
+
+canvas.width = W;
+canvas.height = H;
+
+window.addEventListener("resize", () => {
+    W = window.innerWidth;
+    H = window.innerHeight;
+
+    canvas.width = W;
+    canvas.height = H;
+});
+
+/* =========================
+   GAME SETTINGS
+========================= */
+
+const WORLD_WIDTH = 3000;
+const WORLD_HEIGHT = 3000;
+
+let gameRunning = false;
+let gameOver = false;
+
+let keys = {};
+
+let mouse = {
+    x: W / 2,
+    y: H / 2,
+    down: false
+};
+
+let camera = {
+    x: 0,
+    y: 0
+};
+
+let bullets = [];
+let enemies = [];
+let loot = [];
+let particles = [];
+
+let kills = 0;
+
+let zone = {
+    x: WORLD_WIDTH / 2,
+    y: WORLD_HEIGHT / 2,
+    radius: 1250,
+    targetRadius: 1250,
+    timer: 30
+};
+
+/* =========================
+   PLAYER
+========================= */
+
+let player;
+
+function createPlayer() {
+
+    return {
+        x: WORLD_WIDTH / 2,
+        y: WORLD_HEIGHT / 2,
+
+        radius: 18,
+
+        speed: 4,
+
+        health: 100,
+        armor: 100,
+
+        ammo: 30,
+        reserveAmmo: 120,
+
+        fireCooldown: 0,
+
+        angle: 0
+    };
+}
+
+/* =========================
+   ENEMIES
+========================= */
+
+function createEnemies() {
+
+    enemies = [];
+
+    for (let i = 0; i < 10; i++) {
+
+        let angle = Math.random() * Math.PI * 2;
+        let distance = 350 + Math.random() * 1000;
+
+        enemies.push({
+            x: WORLD_WIDTH / 2 + Math.cos(angle) * distance,
+            y: WORLD_HEIGHT / 2 + Math.sin(angle) * distance,
+
+            radius: 17,
+
+            health: 100,
+
+            speed: 1.2 + Math.random() * .6,
+
+            shootCooldown: 50 + Math.random() * 80,
+
+            color: [
+                "#ff3864",
+                "#ff6b35",
+                "#ff3cac",
+                "#d946ef"
+            ][Math.floor(Math.random() * 4)]
+        });
+    }
+}
+
+/* =========================
+   LOOT
+========================= */
+
+function createLoot() {
+
+    loot = [];
+
+    for (let i = 0; i < 25; i++) {
+
+        loot.push({
+            x: 200 + Math.random() * (WORLD_WIDTH - 400),
+            y: 200 + Math.random() * (WORLD_HEIGHT - 400),
+
+            type: Math.random() > .5 ? "ammo" : "armor",
+
+            radius: 10
+        });
+    }
+}
+
+/* =========================
+   INPUT
+========================= */
+
+window.addEventListener("keydown", e => {
+
+    keys[e.key.toLowerCase()] = true;
+
+    if (e.key.toLowerCase() === "r") {
+        reload();
+    }
+});
+
+window.addEventListener("keyup", e => {
+    keys[e.key.toLowerCase()] = false;
+});
+
+window.addEventListener("mousemove", e => {
+
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+
+    crosshair.style.left = `${mouse.x}px`;
+    crosshair.style.top = `${mouse.y}px`;
+});
+
+window.addEventListener("mousedown", () => {
+    mouse.down = true;
+});
+
+window.addEventListener("mouseup", () => {
+    mouse.down = false;
+});
+
+/* =========================
+   SHOOT
+========================= */
+
+function shoot() {
+
+    if (!gameRunning || gameOver) return;
+
+    if (player.fireCooldown > 0) return;
+
+    if (player.ammo <= 0) {
+
+        reload();
+
+        return;
+    }
+
+    player.ammo--;
+
+    player.fireCooldown = 8;
+
+    let worldMouseX = mouse.x - W / 2 + player.x;
+    let worldMouseY = mouse.y - H / 2 + player.y;
+
+    let angle = Math.atan2(
+        worldMouseY - player.y,
+        worldMouseX - player.x
+    );
+
+    bullets.push({
+        x: player.x,
+        y: player.y,
+
+        vx: Math.cos(angle) * 12,
+        vy: Math.sin(angle) * 12,
+
+        life: 70,
+
+        damage: 35,
+
+        enemy: false
+    });
+}
+
+/* =========================
+   RELOAD
+========================= */
+
+function reload() {
+
+    if (player.ammo >= 30) return;
+
+    if (player.reserveAmmo <= 0) return;
+
+    let needed = 30 - player.ammo;
+
+    let amount = Math.min(
+        needed,
+        player.reserveAmmo
+    );
+
+    player.ammo += amount;
+    player.reserveAmmo -= amount;
+}
+
+/* =========================
+   ENEMY SHOOT
+========================= */
+
+function enemyShoot(enemy) {
+
+    let angle = Math.atan2(
+        player.y - enemy.y,
+        player.x - enemy.x
+    );
+
+    bullets.push({
+
+        x: enemy.x,
+        y: enemy.y,
+
+        vx: Math.cos(angle) * 6,
+        vy: Math.sin(angle) * 6,
+
+        life: 100,
+
+        damage: 8,
+
+        enemy: true
+    });
+}
+
+/* =========================
+   DAMAGE PLAYER
+========================= */
+
+function damagePlayer(amount) {
+
+    if (player.armor > 0) {
+
+        let armorDamage = Math.min(
+            player.armor,
+            amount
+        );
+
+        player.armor -= armorDamage;
+        amount -= armorDamage;
+    }
+
+    if (amount > 0) {
+        player.health -= amount;
+    }
+
+    if (player.health <= 0) {
+
+        player.health = 0;
+
+        endGame(false);
+    }
+}
+
+/* =========================
+   PLAYER UPDATE
+========================= */
+
+function updatePlayer() {
+
+    let dx = 0;
+    let dy = 0;
+
+    if (keys["w"] || keys["arrowup"]) dy--;
+    if (keys["s"] || keys["arrowdown"]) dy++;
+    if (keys["a"] || keys["arrowleft"]) dx--;
+    if (keys["d"] || keys["arrowright"]) dx++;
+
+    if (dx !== 0 || dy !== 0) {
+
+        let length = Math.hypot(dx, dy);
+
+        dx /= length;
+        dy /= length;
+
+        player.x += dx * player.speed;
+        player.y += dy * player.speed;
+    }
+
+    player.x = Math.max(
+        player.radius,
+        Math.min(WORLD_WIDTH - player.radius, player.x)
+    );
+
+    player.y = Math.max(
+        player.radius,
+        Math.min(WORLD_HEIGHT - player.radius, player.y)
+    );
+
+    if (player.fireCooldown > 0) {
+        player.fireCooldown--;
+    }
+
+    if (mouse.down) {
+        shoot();
+    }
+
+    collectLoot();
+
+    checkZoneDamage();
+}
+
+/* =========================
+   ENEMY UPDATE
+========================= */
+
+function updateEnemies() {
+
+    for (let i = enemies.length - 1; i >= 0; i--) {
+
+        const enemy = enemies[i];
+
+        let dx = player.x - enemy.x;
+        let dy = player.y - enemy.y;
+
+        let distance = Math.hypot(dx, dy);
+
+        if (distance > 100) {
+
+            dx /= distance;
+            dy /= distance;
+
+            enemy.x += dx * enemy.speed;
+            enemy.y += dy * enemy.speed;
+        }
+
+        enemy.shootCooldown--;
+
+        if (
+            enemy.shootCooldown <= 0 &&
+            distance < 700
+        ) {
+
+            enemyShoot(enemy);
+
+            enemy.shootCooldown =
+                70 + Math.random() * 100;
+        }
+
+        checkEnemyZone(enemy);
+    }
+}
+
+/* =========================
+   BULLETS
+========================= */
+
+function updateBullets() {
+
+    for (let i = bullets.length - 1; i >= 0; i--) {
+
+        const bullet = bullets[i];
+
+        bullet.x += bullet.vx;
+        bullet.y += bullet.vy;
+
+        bullet.life--;
+
+        if (bullet.life <= 0) {
+
+            bullets.splice(i, 1);
+
+            continue;
+        }
+
+        if (!bullet.enemy) {
+
+            for (let j = enemies.length - 1; j >= 0; j--) {
+
+                const enemy = enemies[j];
+
+                let distance = Math.hypot(
+                    bullet.x - enemy.x,
+                    bullet.y - enemy.y
+                );
+
+                if (distance < enemy.radius + 5) {
+
+                    enemy.health -= bullet.damage;
+
+                    createParticles(
+                        enemy.x,
+                        enemy.y,
+                        enemy.color
+                    );
+
+                    bullets.splice(i, 1);
+
+                    if (enemy.health <= 0) {
+
+                        enemies.splice(j, 1);
+
+                        kills++;
+
+                        updateHUD();
+
+                        if (enemies.length === 0) {
+                            endGame(true);
+                        }
+                    }
+
+                    break;
+                }
+            }
+
+        } else {
+
+            let distance = Math.hypot(
+                bullet.x - player.x,
+                bullet.y - player.y
+            );
+
+            if (distance < player.radius + 5) {
+
+                damagePlayer(bullet.damage);
+
+                bullets.splice(i, 1);
+            }
+        }
+    }
+}
+
+/* =========================
+   LOOT
+========================= */
+
+function collectLoot() {
+
+    for (let i = loot.length - 1; i >= 0; i--) {
+
+        const item = loot[i];
+
+        let distance = Math.hypot(
+            player.x - item.x,
+            player.y - item.y
+        );
+
+        if (distance < 35) {
+
+            if (item.type === "ammo") {
+
+                player.reserveAmmo += 30;
+
+            } else {
+
+                player.armor = Math.min(
+                    100,
+                    player.armor + 30
+                );
+            }
+
+            loot.splice(i, 1);
+        }
+    }
+}
+
+/* =========================
+   ZONE
+========================= */
+
+let zoneInterval;
+
+function startZone() {
+
+    clearInterval(zoneInterval);
+
+    zone.timer = 30;
+
+    zoneInterval = setInterval(() => {
+
+        if (!gameRunning || gameOver) return;
+
+        zone.timer--;
+
+        if (zone.timer <= 0) {
+
+            zone.targetRadius =
+                Math.max(250, zone.radius - 250);
+
+            zone.timer = 30;
+        }
+
+    }, 1000);
+}
+
+function updateZone() {
+
+    if (zone.radius > zone.targetRadius) {
+
+        zone.radius -= .35;
+
+    }
+}
+
+function checkZoneDamage() {
+
+    let distance = Math.hypot(
+        player.x - zone.x,
+        player.y - zone.y
+    );
+
+    if (distance > zone.radius) {
+
+        damagePlayer(.15);
+    }
+}
+
+function checkEnemyZone(enemy) {
+
+    let distance = Math.hypot(
+        enemy.x - zone.x,
+        enemy.y - zone.y
+    );
+
+    if (distance > zone.radius) {
+
+        enemy.health -= .1;
+
+        if (enemy.health <= 0) {
+
+            let index = enemies.indexOf(enemy);
+
+            if (index !== -1) {
+                enemies.splice(index, 1);
+            }
+        }
+    }
+}
+
+/* =========================
+   PARTICLES
+========================= */
+
+function createParticles(x, y, color) {
+
+    for (let i = 0; i < 8; i++) {
+
+        particles.push({
+
+            x,
+            y,
+
+            vx: (Math.random() - .5) * 5,
+            vy: (Math.random() - .5) * 5,
+
+            life: 25,
+
+            color
+        });
+    }
+}
+
+function updateParticles() {
+
+    for (let i = particles.length - 1; i >= 0; i--) {
+
+        const p = particles[i];
+
+        p.x += p.vx;
+        p.y += p.vy;
+
+        p.life--;
+
+        if (p.life <= 0) {
+            particles.splice(i, 1);
+        }
+    }
+}
+
+/* =========================
+   CAMERA
+========================= */
+
+function updateCamera() {
+
+    camera.x = player.x - W / 2;
+    camera.y = player.y - H / 2;
+
+    camera.x = Math.max(
+        0,
+        Math.min(WORLD_WIDTH - W, camera.x)
+    );
+
+    camera.y = Math.max(
+        0,
+        Math.min(WORLD_HEIGHT - H, camera.y)
+    );
+}
+
+/* =========================
+   DRAW
+========================= */
+
+function draw() {
+
+    ctx.clearRect(0, 0, W, H);
+
+    ctx.save();
+
+    ctx.translate(
+        -camera.x,
+        -camera.y
+    );
+
+    drawWorld();
+    drawZone();
+    drawLoot();
+    drawEnemies();
+    drawPlayer();
+    drawBullets();
+    drawParticles();
+
+    ctx.restore();
+}
+
+function drawWorld() {
+
+    ctx.fillStyle = "#0a0d12";
+
+    ctx.fillRect(
+        0,
+        0,
+        WORLD_WIDTH,
+        WORLD_HEIGHT
+    );
+
+    const grid = 80;
+
+    ctx.strokeStyle = "rgba(139,44,255,.08)";
+    ctx.lineWidth = 1;
+
+    for (
+        let x = 0;
+        x <= WORLD_WIDTH;
+        x += grid
+    ) {
+
+        ctx.beginPath();
+
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, WORLD_HEIGHT);
+
+        ctx.stroke();
+    }
+
+    for (
+        let y = 0;
+        y <= WORLD_HEIGHT;
+        y += grid
+    ) {
+
+        ctx.beginPath();
+
+        ctx.moveTo(0, y);
+        ctx.lineTo(WORLD_WIDTH, y);
+
+        ctx.stroke();
+    }
+
+    /* Buildings */
+
+    for (let x = 300; x < WORLD_WIDTH - 300; x += 500) {
+
+        for (let y = 300; y < WORLD_HEIGHT - 300; y += 500) {
+
+            ctx.fillStyle = "rgba(20,22,30,.9)";
+            ctx.fillRect(x, y, 220, 150);
+
+            ctx.strokeStyle = "rgba(139,44,255,.18)";
+            ctx.strokeRect(x, y, 220, 150);
+        }
+    }
+}
+
+function drawZone() {
+
+    ctx.beginPath();
+
+    ctx.arc(
+        zone.x,
+        zone.y,
+        zone.radius,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.strokeStyle = "#b56cff";
+    ctx.lineWidth = 6;
+
+    ctx.shadowColor = "#8b2cff";
+    ctx.shadowBlur = 25;
+
+    ctx.stroke();
+
+    ctx.shadowBlur = 0;
+
+    /* Outside darkness */
+
+    ctx.save();
+
+    ctx.fillStyle = "rgba(80,0,120,.22)";
+
+    ctx.fillRect(
+        0,
+        0,
+        WORLD_WIDTH,
+        WORLD_HEIGHT
+    );
+
+    ctx.globalCompositeOperation =
+        "destination-out";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        zone.x,
+        zone.y,
+        zone.radius,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+    ctx.restore();
+}
+
+function drawPlayer() {
+
+    ctx.save();
+
+    ctx.translate(
+        player.x,
+        player.y
+    );
+
+    let worldMouseX =
+        mouse.x - W / 2 + player.x;
+
+    let worldMouseY =
+        mouse.y - H / 2 + player.y;
+
+    let angle = Math.atan2(
+        worldMouseY - player.y,
+        worldMouseX - player.x
+    );
+
+    ctx.rotate(angle);
+
+    /* Glow */
+
+    ctx.shadowColor = "#b56cff";
+    ctx.shadowBlur = 25;
+
+    ctx.fillStyle = "#8b2cff";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        0,
+        0,
+        player.radius,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+    ctx.shadowBlur = 0;
+
+    /* Gun */
+
+    ctx.fillStyle = "#ddd";
+
+    ctx.fillRect(
+        5,
+        -4,
+        30,
+        8
+    );
+
+    ctx.restore();
+}
+
+function drawEnemies() {
+
+    enemies.forEach(enemy => {
+
+        ctx.save();
+
+        ctx.translate(
+            enemy.x,
+            enemy.y
+        );
+
+        ctx.shadowColor = enemy.color;
+        ctx.shadowBlur = 20;
+
+        ctx.fillStyle = enemy.color;
+
+        ctx.beginPath();
+
+        ctx.arc(
+            0,
+            0,
+            enemy.radius,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.fill();
+
+        ctx.shadowBlur = 0;
+
+        /* Health */
+
+        ctx.fillStyle = "#222";
+
+        ctx.fillRect(
+            -20,
+            -30,
+            40,
+            5
+        );
+
+        ctx.fillStyle = "#ff335f";
+
+        ctx.fillRect(
+            -20,
+            -30,
+            40 * (enemy.health / 100),
+            5
+        );
+
+        ctx.restore();
+    });
+}
+
+function drawBullets() {
+
+    bullets.forEach(bullet => {
+
+        ctx.fillStyle =
+            bullet.enemy
+                ? "#ff416c"
+                : "#d69aff";
+
+        ctx.shadowColor = ctx.fillStyle;
+        ctx.shadowBlur = 12;
+
+        ctx.beginPath();
+
+        ctx.arc(
+            bullet.x,
+            bullet.y,
+            4,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.fill();
+
+        ctx.shadowBlur = 0;
+    });
+}
+
+function drawLoot() {
+
+    loot.forEach(item => {
+
+        ctx.save();
+
+        ctx.translate(
+            item.x,
+            item.y
+        );
+
+        ctx.shadowColor =
+            item.type === "ammo"
+                ? "#ffd23f"
+                : "#4cc9ff";
+
+        ctx.shadowBlur = 15;
+
+        ctx.fillStyle =
+            item.type === "ammo"
+                ? "#ffd23f"
+                : "#4cc9ff";
+
+        ctx.fillRect(
+            -9,
+            -9,
+            18,
+            18
+        );
+
+        ctx.restore();
+    });
+}
+
+function drawParticles() {
+
+    particles.forEach(p => {
+
+        ctx.globalAlpha =
+            p.life / 25;
+
+        ctx.fillStyle = p.color;
+
+        ctx.fillRect(
+            p.x,
+            p.y,
+            4,
+            4
+        );
+    });
+
+    ctx.globalAlpha = 1;
+}
+
+/* =========================
+   HUD
+========================= */
+
+function updateHUD() {
+
+    healthBar.style.width =
+        `${player.health}%`;
+
+    armorBar.style.width =
+        `${player.armor}%`;
+
+    healthText.textContent =
+        Math.ceil(player.health);
+
+    armorText.textContent =
+        Math.ceil(player.armor);
+
+    killsText.textContent =
+        kills;
+
+    playersLeftText.textContent =
+        enemies.length + 1;
+
+    zoneTimerText.textContent =
+        zone.timer;
+
+    ammoText.textContent =
+        `${player.ammo} / ${player.reserveAmmo}`;
+}
+
+/* =========================
+   GAME START
+========================= */
+
+function startGame() {
+
+    player = createPlayer();
+
+    bullets = [];
+    particles = [];
+
+    kills = 0;
+
+    gameOver = false;
+    gameRunning = true;
+
+    zone = {
+        x: WORLD_WIDTH / 2,
+        y: WORLD_HEIGHT / 2,
+        radius: 1250,
+        targetRadius: 1250,
+        timer: 30
+    };
+
+    createEnemies();
+    createLoot();
+
+    startZone();
+
+    message.classList.remove("show");
+
+    startScreen.style.display = "none";
+
+    updateHUD();
+}
+
+/* =========================
+   END GAME
+========================= */
+
+function endGame(victory) {
+
+    if (gameOver) return;
+
+    gameOver = true;
+    gameRunning = false;
+
+    clearInterval(zoneInterval);
+
+    messageTitle.textContent =
+        victory ? "VICTORY" : "GAME OVER";
+
+    messageText.textContent =
+        victory
+            ? `🏆 برنده شدی! ${kills} کیل گرفتی.`
+            : `💀 حذف شدی! ${kills} کیل گرفتی.`;
+
+    message.classList.add("show");
+
+    setTimeout(() => {
+
+        startScreen.style.display = "flex";
+
+        startButton.textContent =
+            victory
+                ? "🏆 بازی دوباره"
+                : "🔄 تلاش دوباره";
+
+    }, 1800);
+}
+
+/* =========================
+   GAME LOOP
+========================= */
+
+function gameLoop() {
+
+    requestAnimationFrame(gameLoop);
+
+    if (!gameRunning) return;
+
+    updatePlayer();
+    updateEnemies();
+    updateBullets();
+    updateParticles();
+
+    updateZone();
+    updateCamera();
+
+    updateHUD();
+
+    draw();
+}
+
+startButton.addEventListener(
+    "click",
+    startGame
+);
+
+backButton.addEventListener(
+    "click",
+    () => {
+        window.location.href = "../index.html";
+    }
+);
+
+/* =========================
+   MOBILE JOYSTICK
+========================= */
+
+const joystick =
+    document.getElementById("joystick");
+
+const joystickKnob =
+    document.getElementById("joystickKnob");
+
+const fireButton =
+    document.getElementById("fireButton");
+
+let joystickActive = false;
+
+joystick.addEventListener(
+    "touchstart",
+    e => {
+
+        joystickActive = true;
+
+        e.preventDefault();
+    },
+    { passive: false }
+);
+
+joystick.addEventListener(
+    "touchmove",
+    e => {
+
+        if (!joystickActive) return;
+
+        e.preventDefault();
+
+        const touch = e.touches[0];
+
+        const rect =
+            joystick.getBoundingClientRect();
+
+        let dx =
+            touch.clientX -
+            (rect.left + rect.width / 2);
+
+        let dy =
+            touch.clientY -
+            (rect.top + rect.height / 2);
+
+        const max = 42;
+
+        const distance =
+            Math.hypot(dx, dy);
+
+        if (distance > max) {
+
+            dx =
+                dx / distance * max;
+
+            dy =
+                dy / distance * max;
+        }
+
+        joystickKnob.style.transform =
+            `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+
+        keys["w"] = dy < -15;
+        keys["s"] = dy > 15;
+        keys["a"] = dx < -15;
+        keys["d"] = dx > 15;
+
+    },
+    { passive: false }
+);
+
+joystick.addEventListener(
+    "touchend",
+    () => {
+
+        joystickActive = false;
+
+        joystickKnob.style.transform =
+            "translate(-50%, -50%)";
+
+        keys["w"] = false;
+        keys["s"] = false;
+        keys["a"] = false;
+        keys["d"] = false;
+    }
+);
+
+fireButton.addEventListener(
+    "touchstart",
+    e => {
+
+        e.preventDefault();
+
+        mouse.down = true;
+    },
+    { passive: false }
+);
+
+fireButton.addEventListener(
+    "touchend",
+    e => {
+
+        e.preventDefault();
+
+        mouse.down = false;
+    },
+    { passive: false }
+);
+
+/* Start loop */
+
+gameLoop();
+
+</script>
+
+</body>
+</html>
